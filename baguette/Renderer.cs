@@ -97,8 +97,6 @@ namespace baguette
 
         ImDrawListPtr drawListPtr;
 
-        private bool _cs2Found = false;
-
         private bool _espEnabled = false;
         private bool _espBoxeEnabled = true;
         private bool _espLinesEnabled = true;
@@ -118,28 +116,25 @@ namespace baguette
             ImGui.Checkbox("Enable ESP", ref _espEnabled);
             if(ImGui.CollapsingHeader("Esp"))
             {
-            ImGui.Checkbox("Enable Boxe ESP", ref _espBoxeEnabled);
-            ImGui.Checkbox("Enable ESP Lines", ref _espLinesEnabled);
-            ImGui.Checkbox("Enable Healthbar", ref _espHealthBarEnabmled);
-            ImGui.Checkbox("Enable Heads", ref _espHeadEnabled);
-            ImGui.Checkbox("Enable Bones", ref _espBonesEnabled);
-            ImGui.Checkbox("Enable Bomb", ref _espBombEnabled);
+                if (ImGui.CollapsingHeader("Enemy team color"))
+                {
+                    ImGui.ColorPicker4("##color", ref _enemyTeamColor);
+                }
+                if (ImGui.CollapsingHeader("Ally team color"))
+                {
+                    ImGui.ColorPicker4("##color", ref _allyTeamColor);
+                }
+                ImGui.Checkbox("Enable Boxe ESP", ref _espBoxeEnabled);
+                ImGui.Checkbox("Enable ESP Lines", ref _espLinesEnabled);
+                ImGui.Checkbox("Enable Healthbar", ref _espHealthBarEnabmled);
+                ImGui.Checkbox("Enable Heads", ref _espHeadEnabled);
+                ImGui.Checkbox("Enable Bones", ref _espBonesEnabled);
+                ImGui.Checkbox("Enable Bomb", ref _espBombEnabled);
             }
             ImGui.Checkbox("Enable Trigger Bot", ref _tiggerBotEnabled);
             if(ImGui.CollapsingHeader("Trigger Bot"))
             {
             }
-
-            /*
-            if (ImGui.CollapsingHeader("Enemy team color"))
-            {
-                ImGui.ColorPicker4("##color", ref _enemyTeamColor);
-            }
-            if (ImGui.CollapsingHeader("Ally team color"))
-            {
-                ImGui.ColorPicker4("##color", ref _allyTeamColor);
-            }
-            */
 
             // DrawOverlay
             DrawOverlay();
