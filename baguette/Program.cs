@@ -15,6 +15,7 @@ IntPtr clientPtr = swed.GetModuleBase("client.dll");
 Console.WriteLine("client.dll found");
 
 Renderer renderer = new Renderer();
+renderer.initImageAssets();
 Thread rendererThread = new Thread(new ThreadStart(renderer.Start().Wait));
 
 rendererThread.Start();
@@ -57,14 +58,11 @@ while (true)
     IntPtr listEntryPtr = swed.ReadPointer(entityListPtr, 0x10);
     IntPtr localPlayerPawnPtr = swed.ReadPointer(clientPtr, dwLocalPlayerPawn);
 
-    // float[] viewMatrix = swed.ReadMatrix(clientPtr + dwViewMatrix);
     ViewMatrix viewMatrix = Renderer.ReadMatrix(clientPtr + dwViewMatrix, swed);
-    // TODO : Error handling
 
     IntPtr c4Entity = swed.ReadPointer(swed.ReadPointer(clientPtr, dwWeaponC4));
     IntPtr bombOwnerPtr = swed.ReadPointer(c4Entity, m_hOwnerEntity);
 
-    // Console.WriteLine($"localPlayer.Team : {localPlayer.Team}");
     for (int i = 0; i < 64; i++)
     {
         IntPtr currentControllerPtr = swed.ReadPointer(listEntryPtr, i * 0x78);
@@ -118,21 +116,17 @@ while (true)
         entity.hasDiffuser = swed.ReadBool(entryItemServicesPtr, m_bHasDefuser);
         entity.hasArmor = swed.ReadBool(entryItemServicesPtr, m_bHasHeavyArmor);
         entity.hasHelmet = swed.ReadBool(entryItemServicesPtr, m_bHasHelmet);
+
         entity.hasBomb = (int)bombOwnerPtr == pawnHandle;
-        //Console.WriteLine($"bombOwnerPtr : {bombOwnerPtr:x} /  {(int)bombOwnerPtr:x}");
-        //Console.WriteLine($"listEntryPtr : {pawnHandle:x}");
 
         entity.Name = swed.ReadString(currentControllerPtr, m_sSanitizedPlayerName);
         entity.Health = swed.ReadInt(entryPlayerPawn, m_iHealth);
-        // Console.WriteLine($"i: {i}/ entity.Team : {entity.Team}");
         entity.PositionV3 = swed.ReadVec(entryPlayerPawn, m_vOldOrigin);
         entity.ViewOffsetV3 = swed.ReadVec(entryPlayerPawn, m_vecViewOffset);
         entity.PositionV2 = Renderer.WorldToScreen(viewMatrix, entity.PositionV3, screenSize);
         entity.ViewOffsetV2 = Renderer.WorldToScreen(viewMatrix, Vector3.Add(entity.PositionV3, entity.ViewOffsetV3), screenSize);
-        // Console.WriteLine($"i: {i}/{entity.Name} / entity.PositionV3 : {entity.PositionV3}");
 
         entity.Distance = Vector3.Distance(entity.PositionV3, localPlayer.PositionV3);
-        // Console.WriteLine($"i: {i} / entity.Distance : {entity.Distance}");
         
         entity.bones3D = Renderer.ReadBones(boneMatrixPtr, swed);
         entity.bones2D = Renderer.ReadBones2D(entity.bones3D, viewMatrix, screenSize);
@@ -147,17 +141,6 @@ while (true)
     localPlayer.ViewOffsetV3 = swed.ReadVec(localPlayerPawnPtr, m_vecViewOffset);
     localPlayer.PositionV2 = Renderer.WorldToScreen(viewMatrix, localPlayer.PositionV3, screenSize);
     localPlayer.ViewOffsetV2 = Renderer.WorldToScreen(viewMatrix, Vector3.Add(localPlayer.PositionV3, localPlayer.ViewOffsetV3), screenSize);
-
-
-    /*    
-        IntPtr bombPtr = swed.ReadPointer(clientPtr, dwWeaponC4);
-        Console.WriteLine("----------");
-        Console.WriteLine($"bombPtr : {bombPtr}");
-        IntPtr bombOwnerPtr = swed.ReadPointer(bombPtr, m_hOwnerEntity);
-        Console.WriteLine($"bombOwnerPtr : {bombOwnerPtr}");
-        IntPtr bombPlayerPawnPtr = swed.ReadPointer(bombOwnerPtr, dwLocalPlayerPawn);
-        Console.WriteLine($"bombPlayerPawnPtr : {bombPlayerPawnPtr}");
-    */
 
     renderer.UpdateLocalEntities(entities);
     renderer.UpdateLocalPlayer(localPlayer);

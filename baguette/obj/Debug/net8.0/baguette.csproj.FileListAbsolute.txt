@@ -31,3 +31,7 @@ C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\runtimes\win-x86\
 C:\Users\lenoi\source\repos\baguette\baguette\obj\Debug\net8.0\baguette.csproj.AssemblyReference.cache
 C:\Users\lenoi\source\repos\baguette\baguette\obj\Debug\net8.0\baguette.csproj.Up2Date
 C:\Users\lenoi\source\repos\baguette\baguette\obj\Debug\net8.0\baguette.sourcelink.json
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\assets\Armor_hud_css.png
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\assets\Armor_hud_helmet_css.png
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\assets\baguette3.png
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\assets\Bombdefusal.png

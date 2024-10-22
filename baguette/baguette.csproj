@@ -6,7 +6,33 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PlatformTarget>x64</PlatformTarget>
+    <PackageIcon>baguette3.png</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="assets\Armor_hud_css.png" />
+    <None Remove="assets\Armor_hud_helmet_css.png" />
+    <None Remove="assets\baguette3.png" />
+    <None Remove="assets\Bombdefusal.png" />
+    <None Remove="assets\pngegg.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="assets\Armor_hud_css.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\Armor_hud_helmet_css.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\baguette3.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="assets\Bombdefusal.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ClickableTransparentOverlay" Version="9.1.0" />
