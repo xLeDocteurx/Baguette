@@ -15,8 +15,8 @@ IntPtr clientPtr = swed.GetModuleBase("client.dll");
 Console.WriteLine("client.dll found");
 
 Renderer renderer = new Renderer();
-renderer.initImageAssets();
 Thread rendererThread = new Thread(new ThreadStart(renderer.Start().Wait));
+// renderer.initImageAssets();
 
 rendererThread.Start();
 
@@ -36,6 +36,7 @@ int m_vOldOrigin = 0x1324; // Vector
 int m_iTeamNum = 0x3E3; // uint8
 int m_lifeState = 0x348; // uint8
 int m_iHealth = 0x344; // int32
+int m_ArmorValue = 0x2404; // int32
 int m_hPlayerPawn = 0x80C; // CHandle<C_CSPlayerPawn>
 int m_sSanitizedPlayerName = 0x770; // CUtlString
 int m_vecViewOffset = 0xCB0; // CNetworkViewOffsetVector
@@ -121,6 +122,7 @@ while (true)
 
         entity.Name = swed.ReadString(currentControllerPtr, m_sSanitizedPlayerName);
         entity.Health = swed.ReadInt(entryPlayerPawn, m_iHealth);
+        entity.Armor = swed.ReadInt(entryPlayerPawn, m_ArmorValue);
         entity.PositionV3 = swed.ReadVec(entryPlayerPawn, m_vOldOrigin);
         entity.ViewOffsetV3 = swed.ReadVec(entryPlayerPawn, m_vecViewOffset);
         entity.PositionV2 = Renderer.WorldToScreen(viewMatrix, entity.PositionV3, screenSize);
@@ -136,6 +138,7 @@ while (true)
 
     localPlayer.Team = swed.ReadInt(localPlayerPawnPtr, m_iTeamNum);
     localPlayer.Health = swed.ReadInt(localPlayerPawnPtr, m_iHealth);
+    localPlayer.Armor = swed.ReadInt(localPlayerPawnPtr, m_ArmorValue);
 
     localPlayer.PositionV3 = swed.ReadVec(localPlayerPawnPtr, m_vOldOrigin);
     localPlayer.ViewOffsetV3 = swed.ReadVec(localPlayerPawnPtr, m_vecViewOffset);

@@ -34,7 +34,7 @@ namespace baguette
         public bool hasHelmet{ get; set; }
         public string Name { get; set; }
         public int Health { get; set; }
-        // public int Shield { get; set; }
+        public int Armor { get; set; }
         public float Distance { get; set; }
 
         public Vector3 PositionV3 { get; set; }

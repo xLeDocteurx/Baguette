@@ -91,15 +91,15 @@ namespace baguette
 
         public Vector2 screenSize = new Vector2(1920, 1080);
         // Load the texture
-        uint w, h;
-        nint bombImgW, bombImgH;
-        nint bombImgPtr = 0;
-        nint diffuserImgW, diffuserImgH;
-        nint diffuserImgPtr = 0;
-        nint kevlarImgW, kevlarImgH;
-        nint kevlarImgPtr = 0;
-        nint helmetImgW, helmetImgH;
-        nint helmetImgPtr = 0;
+        bool isInit = false;
+        uint bombImgW, bombImgH = 0;
+        IntPtr bombImgPtr = 0;
+        uint diffuserImgW, diffuserImgH = 0;
+        IntPtr diffuserImgPtr = 0;
+        uint kevlarImgW, kevlarImgH = 0;
+        IntPtr kevlarImgPtr = 0;
+        uint helmetImgW, helmetImgH = 0;
+        IntPtr helmetImgPtr = 0;
 
         private ConcurrentQueue<Entity> _entities = new ConcurrentQueue<Entity>();
         private Entity _localPlayer = new Entity();
@@ -111,6 +111,7 @@ namespace baguette
         private bool _espBoxeEnabled = true;
         private bool _espLinesEnabled = true;
         private bool _espHealthBarEnabmled = true;
+        private bool _espArmorBarEnabmled = true;
         private bool _espHeadEnabled = true;
         private bool _espBonesEnabled = false;
         private bool _espBombEnabled = true;
@@ -120,18 +121,24 @@ namespace baguette
 
         private Vector4 _enemyTeamColor = new Vector4(1, 0, 0, 1);
         private Vector4 _allyTeamColor = new Vector4(0, 1, 0, 1);
+        private Vector4 bombColor = new Vector4(0, 0, 1, 1);
 
-        public void initImageAssets()
+        public void init()
         {
-            // AddOrGetImagePointer("./assets/Bombdefusal.png", false, out IntPtr bombImgPtr, out uint w, out uint h);
-            AddOrGetImagePointer("./assets/Bombdefusal.png", false, out IntPtr bombImgPtr, out uint bombImgW, out uint bombImgH);
-            AddOrGetImagePointer("./assets/cisors.png", false, out IntPtr diffuserImgPtr, out uint diffuserImgW, out uint diffuserImgH);
-            AddOrGetImagePointer("./assets/Armor_hud_css.png", false, out IntPtr kevlarImgPtr, out uint kevlarImgW, out uint kevlarImgH);
-            AddOrGetImagePointer("./assets/Armor_hud_helmet_css.png", false, out IntPtr helmetImgPtr, out uint helmetImgW, out uint helmetImgHs);
+            AddOrGetImagePointer("./assets/Bombdefusal.png", false, out bombImgPtr, out _, out _);
+            AddOrGetImagePointer("./assets/cisors.png", false, out diffuserImgPtr, out _, out _);
+            AddOrGetImagePointer("./assets/Armor_hud_css.png", false, out kevlarImgPtr, out _, out _);
+            AddOrGetImagePointer("./assets/Armor_hud_helmet_css.png", false, out helmetImgPtr, out _, out _);
         }
 
         protected override void Render()
         {
+            if(!isInit)
+            {
+                init();
+                isInit = true;
+            }
+
 
             ImGui.Begin("Baguette");
             ImGui.Checkbox("Enable ESP", ref _espEnabled);
@@ -150,6 +157,7 @@ namespace baguette
                 ImGui.Checkbox("Enable Boxe ESP", ref _espBoxeEnabled);
                 ImGui.Checkbox("Enable ESP Lines", ref _espLinesEnabled);
                 ImGui.Checkbox("Enable Healthbar", ref _espHealthBarEnabmled);
+                ImGui.Checkbox("Enable Armor", ref _espArmorBarEnabmled);
                 ImGui.Checkbox("Enable Heads", ref _espHeadEnabled);
                 ImGui.Checkbox("Enable Bones", ref _espBonesEnabled);
                 ImGui.Checkbox("Enable Bomb & Diffusers", ref _espBombEnabled);
@@ -188,6 +196,11 @@ namespace baguette
                             DrawHealthBar(entity);
                         }
 
+                        if (_espArmorBarEnabmled)
+                        {
+                            DrawArmorBar(entity);
+                        }
+
                         if (_espHeadEnabled)
                         {
                             DrawHead(entity);
@@ -224,7 +237,7 @@ namespace baguette
 
         void DrawLine(Entity entity)
         {
-            Vector4 lineColor = _localPlayer.Team == entity.Team ? _allyTeamColor : _enemyTeamColor;
+            Vector4 lineColor = _localPlayer.Team == entity.Team ? _allyTeamColor : entity.hasBomb ? bombColor : _enemyTeamColor;
             drawListPtr.AddLine(new Vector2(screenSize.X / 2, screenSize.Y), entity.PositionV2, ImGui.ColorConvertFloat4ToU32(lineColor));
         }
 
@@ -252,19 +265,40 @@ namespace baguette
 
             float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
             float entityWidth = entityHeight / 4;
-            float fillHeight = entityHeight * (entity.Health / 100.0f);
+            float healthFillHeight = entityHeight * (entity.Health / 100.0f);
             float fillWidth = entityWidth / 4;
 
-            Vector2 rectTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + fillWidth, entity.ViewOffsetV2.Y);
-            Vector2 rectBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
+            Vector2 healthRectTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + fillWidth, entity.ViewOffsetV2.Y);
+            Vector2 healthRectBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
+            Vector2 healthFillTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + fillWidth, entity.PositionV2.Y + healthFillHeight);
+            Vector2 healthFillBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
 
-            Vector2 fillTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + fillWidth, entity.PositionV2.Y + fillHeight);
-            Vector2 fillBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
-
-            drawListPtr.AddRectFilled(rectTop, rectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
-            drawListPtr.AddRectFilled(fillTop, fillBottom, ImGui.ColorConvertFloat4ToU32(healthBarFillColor));
-            drawListPtr.AddRect(rectTop, rectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
+            drawListPtr.AddRectFilled(healthRectTop, healthRectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
+            drawListPtr.AddRectFilled(healthFillTop, healthFillBottom, ImGui.ColorConvertFloat4ToU32(healthBarFillColor));
+            drawListPtr.AddRect(healthRectTop, healthRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
         }
+
+        void DrawArmorBar(Entity entity)
+        {
+            Vector4 boxColor = new Vector4(0, 0, 0, 1);
+            Vector4 boxFillColor = new Vector4(0, 0, 0, 0.25f);
+            Vector4 armorBarFillColor = new Vector4(1, 1, 0, 1);
+
+            float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
+            float entityWidth = entityHeight / 4;
+            float armorFillHeight = entityHeight * (entity.Armor / 100.0f);
+            float fillWidth = entityWidth / 4;
+
+            Vector2 armorRectTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + (fillWidth * 2) + fillWidth, entity.ViewOffsetV2.Y);
+            Vector2 armorRectBottom = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 2), entity.PositionV2.Y);
+            Vector2 armorFillTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + (fillWidth * 2) + fillWidth, entity.PositionV2.Y + armorFillHeight);
+            Vector2 armorFillBottom = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 2), entity.PositionV2.Y);
+
+            drawListPtr.AddRectFilled(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
+            drawListPtr.AddRectFilled(armorFillTop, armorFillBottom, ImGui.ColorConvertFloat4ToU32(armorBarFillColor));
+            drawListPtr.AddRect(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
+        }
+
         void DrawHead(Entity entity)
         {
             Vector4 fillColor = _localPlayer.Team == entity.Team ? _allyTeamColor : _enemyTeamColor;
@@ -286,41 +320,43 @@ namespace baguette
         {
             if(entity.hasBomb)
             {
-                Vector4 bombColor = new Vector4(0, 0, 1, 1);
-
                 float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
                 float entityWidth = entityHeight / 4;
 
-                float circleRadius = (-entityHeight) / 10 / 2;
+                float circleRadius = (-entityHeight) / 10;
 
-                Vector2 rectTop = new Vector2(entity.PositionV2.X - circleRadius, entity.PositionV2.Y - circleRadius);
-                Vector2 rectBottom = new Vector2(entity.PositionV2.X + circleRadius, entity.PositionV2.Y + circleRadius);
+                Vector2 rectTop = new Vector2(entity.ViewOffsetV2.X - entityWidth, entity.ViewOffsetV2.Y);
+                Vector2 rectBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
+
+                Vector2 imgTop = new Vector2(entity.PositionV2.X - circleRadius, entity.PositionV2.Y - circleRadius);
+                Vector2 imgBottom = new Vector2(entity.PositionV2.X + circleRadius, entity.PositionV2.Y + circleRadius);
 
                 drawListPtr.AddRect(rectTop, rectBottom, ImGui.ColorConvertFloat4ToU32(bombColor));
-                // drawListPtr.AddCircleFilled(entity.PositionV2, circleRadius, ImGui.ColorConvertFloat4ToU32(bombColor));
+                // TODO : Remove ?
+                drawListPtr.AddCircleFilled(entity.PositionV2, circleRadius, ImGui.ColorConvertFloat4ToU32(bombColor));
 
                 // Define UV coordinates for the image (usually [0, 0] for top-left and [1, 1] for bottom-right)
                 Vector2 uv0 = new Vector2(0, 0);
                 Vector2 uv1 = new Vector2(1, 1);
 
-                drawListPtr.AddImage(bombImgPtr, rectTop, rectBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(bombColor));
+                // drawListPtr.AddImage(bombImgPtr, imgTop, imgBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(bombColor));
+                drawListPtr.AddImage(bombImgPtr, imgTop, imgBottom, uv0, uv1);
             }
             if(entity.hasDiffuser)
             {
-                Vector4 diffuserColor = new Vector4(0, 0, 1, 1);
-
                 float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
                 float entityWidth = entityHeight / 4;
 
-                float circleRadius = (-entityHeight) / 10 / 2;
+                float circleRadius = (-entityHeight) / 10;
 
-                Vector2 rectTop = new Vector2(entity.PositionV2.X - circleRadius, entity.PositionV2.Y - circleRadius);
-                Vector2 rectBottom = new Vector2(entity.PositionV2.X + circleRadius, entity.PositionV2.Y + circleRadius);
+                Vector2 imgTop = new Vector2(entity.PositionV2.X - circleRadius, entity.PositionV2.Y - circleRadius);
+                Vector2 imgBottom = new Vector2(entity.PositionV2.X + circleRadius, entity.PositionV2.Y + circleRadius);
 
                 Vector2 uv0 = new Vector2(0, 0);
                 Vector2 uv1 = new Vector2(1, 1);
 
-                drawListPtr.AddImage(diffuserImgPtr, rectTop, rectBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(diffuserColor));
+                // drawListPtr.AddImage(diffuserImgPtr, imgTop, imgBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(bombColor));
+                drawListPtr.AddImage(diffuserImgPtr, imgTop, imgBottom, uv0, uv1);
             }
         }
 
@@ -328,37 +364,35 @@ namespace baguette
         {
             if (entity.hasHelmet)
             {
-                Vector4 diffuserColor = new Vector4(0, 0, 1, 1);
-
                 float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
                 float entityWidth = entityHeight / 4;
 
-                float circleRadius = (-entityHeight) / 10 / 2;
+                float circleRadius = (-entityHeight) / 10;
 
-                Vector2 rectTop = new Vector2(entity.ViewOffsetV2.X - circleRadius, entity.ViewOffsetV2.Y - circleRadius);
-                Vector2 rectBottom = new Vector2(entity.ViewOffsetV2.X + circleRadius, entity.ViewOffsetV2.Y + circleRadius);
+                Vector2 rectTop = new Vector2(entity.ViewOffsetV2.X + entityWidth - circleRadius, entity.ViewOffsetV2.Y - circleRadius);
+                Vector2 rectBottom = new Vector2(entity.ViewOffsetV2.X + entityWidth + circleRadius, entity.ViewOffsetV2.Y + circleRadius);
 
                 Vector2 uv0 = new Vector2(0, 0);
                 Vector2 uv1 = new Vector2(1, 1);
 
-                drawListPtr.AddImage(helmetImgPtr, rectTop, rectBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(diffuserColor));
+                // drawListPtr.AddImage(helmetImgPtr, rectTop, rectBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(diffuserColor));
+                drawListPtr.AddImage(helmetImgPtr, rectTop, rectBottom, uv0, uv1);
             }
             else if (entity.hasArmor)
             {
-                Vector4 diffuserColor = new Vector4(0, 0, 1, 1);
-
                 float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
                 float entityWidth = entityHeight / 4;
 
-                float circleRadius = (-entityHeight) / 10 / 2;
+                float circleRadius = (-entityHeight) / 10;
 
-                Vector2 rectTop = new Vector2(entity.ViewOffsetV2.X - circleRadius, entity.ViewOffsetV2.Y - circleRadius);
-                Vector2 rectBottom = new Vector2(entity.ViewOffsetV2.X + circleRadius, entity.ViewOffsetV2.Y + circleRadius);
+                Vector2 rectTop = new Vector2(entity.ViewOffsetV2.X + entityWidth - circleRadius, entity.ViewOffsetV2.Y - circleRadius);
+                Vector2 rectBottom = new Vector2(entity.ViewOffsetV2.X + entityWidth + circleRadius, entity.ViewOffsetV2.Y + circleRadius);
 
                 Vector2 uv0 = new Vector2(0, 0);
                 Vector2 uv1 = new Vector2(1, 1);
 
-                drawListPtr.AddImage(kevlarImgPtr, rectTop, rectBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(diffuserColor));
+                // drawListPtr.AddImage(kevlarImgPtr, rectTop, rectBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(diffuserColor));
+                drawListPtr.AddImage(kevlarImgPtr, rectTop, rectBottom, uv0, uv1);
             }
         }
 
