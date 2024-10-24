@@ -92,14 +92,11 @@ namespace baguette
         public Vector2 screenSize = new Vector2(1920, 1080);
         // Load the texture
         bool isInit = false;
-        uint bombImgW, bombImgH = 0;
-        IntPtr bombImgPtr = 0;
-        uint diffuserImgW, diffuserImgH = 0;
-        IntPtr diffuserImgPtr = 0;
-        uint kevlarImgW, kevlarImgH = 0;
-        IntPtr kevlarImgPtr = 0;
-        uint helmetImgW, helmetImgH = 0;
-        IntPtr helmetImgPtr = 0;
+        IntPtr logoImgPtr;
+        IntPtr bombImgPtr;
+        IntPtr diffuserImgPtr;
+        IntPtr kevlarImgPtr;
+        IntPtr helmetImgPtr;
 
         private ConcurrentQueue<Entity> _entities = new ConcurrentQueue<Entity>();
         private Entity _localPlayer = new Entity();
@@ -107,13 +104,13 @@ namespace baguette
 
         ImDrawListPtr drawListPtr;
 
-        private bool _espEnabled = false;
+        private bool _espEnabled = true;
         private bool _espBoxeEnabled = true;
         private bool _espLinesEnabled = true;
         private bool _espHealthBarEnabmled = true;
         private bool _espArmorBarEnabmled = true;
         private bool _espHeadEnabled = true;
-        private bool _espBonesEnabled = false;
+        private bool _espBonesEnabled = true;
         private bool _espBombEnabled = true;
         private bool _espKevlarEnabled = true;
 
@@ -125,6 +122,8 @@ namespace baguette
 
         public void init()
         {
+            AddOrGetImagePointer("./assets/baguette3.png", false, out logoImgPtr, out _, out _);
+
             AddOrGetImagePointer("./assets/Bombdefusal.png", false, out bombImgPtr, out _, out _);
             AddOrGetImagePointer("./assets/cisors.png", false, out diffuserImgPtr, out _, out _);
             AddOrGetImagePointer("./assets/Armor_hud_css.png", false, out kevlarImgPtr, out _, out _);
@@ -141,6 +140,10 @@ namespace baguette
 
 
             ImGui.Begin("Baguette");
+            
+            ImGui.Image(logoImgPtr, new Vector2(200, 200));
+
+            ImGui.NewLine();
             ImGui.Checkbox("Enable ESP", ref _espEnabled);
             if(ImGui.CollapsingHeader("Esp"))
             {
@@ -304,17 +307,13 @@ namespace baguette
             Vector4 fillColor = _localPlayer.Team == entity.Team ? _allyTeamColor : _enemyTeamColor;
             fillColor.W = 0.25f;
             Vector4 outlineColor = new Vector4(0, 0, 0, 1);
-            // Vector4 outlineColor = _localPlayer.Team == entity.Team ? _allyTeamColor : _enemyTeamColor;s
 
-            float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
+            uint currentBoneColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0, 0, 1, 1));
+            uint currentBoneColorBis = ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1));
+            float currentBoneThickness = 4 / entity.Distance;
 
-            Vector2 circlePosition = new Vector2(entity.ViewOffsetV2.X, entity.ViewOffsetV2.Y);
-            float circleRadius = (-entityHeight) / 10;
-
-            drawListPtr.AddCircleFilled(circlePosition, circleRadius, ImGui.ColorConvertFloat4ToU32(fillColor));
-            drawListPtr.AddCircle(circlePosition, circleRadius, ImGui.ColorConvertFloat4ToU32(outlineColor));
+            drawListPtr.AddCircle(entity.bones2D[2], currentBoneThickness * 10, currentBoneColorBis);
         }
-
 
         void DrawBombOrDiffuser(Entity entity)
         {
@@ -328,8 +327,8 @@ namespace baguette
                 Vector2 rectTop = new Vector2(entity.ViewOffsetV2.X - entityWidth, entity.ViewOffsetV2.Y);
                 Vector2 rectBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
 
-                Vector2 imgTop = new Vector2(entity.PositionV2.X - circleRadius, entity.PositionV2.Y - circleRadius);
-                Vector2 imgBottom = new Vector2(entity.PositionV2.X + circleRadius, entity.PositionV2.Y + circleRadius);
+                Vector2 imgTop = new Vector2(entity.ViewOffsetV2.X - circleRadius, entity.ViewOffsetV2.Y - circleRadius - 100);
+                Vector2 imgBottom = new Vector2(entity.ViewOffsetV2.X + circleRadius, entity.ViewOffsetV2.Y + circleRadius - 100);
 
                 drawListPtr.AddRect(rectTop, rectBottom, ImGui.ColorConvertFloat4ToU32(bombColor));
                 // TODO : Remove ?
@@ -339,8 +338,8 @@ namespace baguette
                 Vector2 uv0 = new Vector2(0, 0);
                 Vector2 uv1 = new Vector2(1, 1);
 
-                // drawListPtr.AddImage(bombImgPtr, imgTop, imgBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(bombColor));
-                drawListPtr.AddImage(bombImgPtr, imgTop, imgBottom, uv0, uv1);
+                drawListPtr.AddImage(bombImgPtr, imgTop, imgBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(bombColor));
+                // drawListPtr.AddImage(bombImgPtr, imgTop, imgBottom, uv0, uv1);
             }
             if(entity.hasDiffuser)
             {
@@ -349,14 +348,14 @@ namespace baguette
 
                 float circleRadius = (-entityHeight) / 10;
 
-                Vector2 imgTop = new Vector2(entity.PositionV2.X - circleRadius, entity.PositionV2.Y - circleRadius);
-                Vector2 imgBottom = new Vector2(entity.PositionV2.X + circleRadius, entity.PositionV2.Y + circleRadius);
+                Vector2 imgTop = new Vector2(entity.ViewOffsetV2.X - circleRadius, entity.ViewOffsetV2.Y - circleRadius - 100);
+                Vector2 imgBottom = new Vector2(entity.ViewOffsetV2.X + circleRadius, entity.ViewOffsetV2.Y + circleRadius - 100);
 
                 Vector2 uv0 = new Vector2(0, 0);
                 Vector2 uv1 = new Vector2(1, 1);
 
-                // drawListPtr.AddImage(diffuserImgPtr, imgTop, imgBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(bombColor));
-                drawListPtr.AddImage(diffuserImgPtr, imgTop, imgBottom, uv0, uv1);
+                drawListPtr.AddImage(diffuserImgPtr, imgTop, imgBottom, uv0, uv1, ImGui.ColorConvertFloat4ToU32(bombColor));
+                // drawListPtr.AddImage(diffuserImgPtr, imgTop, imgBottom, uv0, uv1);
             }
         }
 
@@ -402,11 +401,13 @@ namespace baguette
             uint currentBoneColorBis = ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1));
             float currentBoneThickness = 4 / entity.Distance;
 
+            /*
             foreach (Vector2 joint in entity.bones2D)
             {
                 drawListPtr.AddCircleFilled(joint, 5, currentBoneColor);
-            }
-           
+           }
+            */
+
             drawListPtr.AddLine(entity.bones2D[1], entity.bones2D[2], currentBoneColorBis, currentBoneThickness);
             drawListPtr.AddLine(entity.bones2D[1], entity.bones2D[3], currentBoneColorBis, currentBoneThickness);
             drawListPtr.AddLine(entity.bones2D[1], entity.bones2D[6], currentBoneColorBis, currentBoneThickness);
@@ -419,8 +420,9 @@ namespace baguette
             drawListPtr.AddLine(entity.bones2D[0], entity.bones2D[11], currentBoneColorBis, currentBoneThickness);
             drawListPtr.AddLine(entity.bones2D[9], entity.bones2D[10], currentBoneColorBis, currentBoneThickness);
             drawListPtr.AddLine(entity.bones2D[11], entity.bones2D[12], currentBoneColorBis, currentBoneThickness);
-            drawListPtr.AddCircle(entity.bones2D[2], 3 + currentBoneThickness, currentBoneColorBis);
-            
+
+            drawListPtr.AddCircle(entity.bones2D[2], currentBoneThickness * 10, currentBoneColorBis);
+
         }
 
         public ConcurrentQueue<Entity> GetEntities()

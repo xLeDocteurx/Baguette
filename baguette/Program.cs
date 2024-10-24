@@ -6,13 +6,13 @@ using System.Numerics;
 using System.Reflection;
 
 // See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+Console.WriteLine("This is baguette !");
 
 Swed swed = new Swed("cs2");
-Console.WriteLine("CS2 found");
+// Console.WriteLine("CS2 found");
 
 IntPtr clientPtr = swed.GetModuleBase("client.dll");
-Console.WriteLine("client.dll found");
+// Console.WriteLine("client.dll found");
 
 Renderer renderer = new Renderer();
 Thread rendererThread = new Thread(new ThreadStart(renderer.Start().Wait));
@@ -26,10 +26,10 @@ Entity localPlayer = new Entity();
 Entity bomb = new Entity();
 
 /* Offsets.cs */
-int dwLocalPlayerPawn = 0x1831AE8;
-int dwEntityList = 0x19CCAD8;
-int dwViewMatrix = 0x1A2EC30;
-int dwWeaponC4 = 0x19CFD60;
+int dwLocalPlayerPawn = 0x1834B18;
+int dwEntityList = 0x19CFC48;
+int dwViewMatrix = 0x1A31D30;
+int dwWeaponC4 = 0x19D2D60;
 
 /* client.dll.cs */
 int m_vOldOrigin = 0x1324; // Vector
@@ -103,7 +103,8 @@ while (true)
             continue;
         }
 
-        IntPtr boneMatrixPtr = swed.ReadPointer(sceneNodePtr, m_modelState, + 0x80); // 0x80 would be dwBoneMatrix
+        // IntPtr boneMatrixPtr = swed.ReadPointer(sceneNodePtr, m_modelState, + 0x80); // 0x80 would be dwBoneMatrix
+        IntPtr boneMatrixPtr = swed.ReadPointer(sceneNodePtr, m_modelState + 0x80); // 0x80 would be dwBoneMatrix
         if (boneMatrixPtr == IntPtr.Zero)
         {
             continue;
