@@ -5,25 +5,32 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
 
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("This is baguette !");
+
+Renderer renderer = new Renderer();
+Thread rendererThread = new Thread(new ThreadStart(renderer.Start().Wait));
+
+rendererThread.Start();
+
 Console.WriteLine("Looking for cs2 process...");
 
 while (Process.GetProcessesByName("cs2").Length == 0) {}
 Swed swed = new Swed("cs2");
 
+IntPtr clientPtr = swed.GetModuleBase("client.dll");
+
 Console.WriteLine("CS2 found");
 
-IntPtr clientPtr = swed.GetModuleBase("client.dll");
-// Console.WriteLine("client.dll found");
+[DllImport("user32.dll")]
+static extern short GetAsyncKeyState(int vKey); // Handle hotkey
 
-Renderer renderer = new Renderer();
-Thread rendererThread = new Thread(new ThreadStart(renderer.Start().Wait));
-// renderer.initImageAssets();
+[DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, int dwExtraInfo);
 
-rendererThread.Start();
 
 Vector2 screenSize = renderer.screenSize;
 List<Entity> entities = new List<Entity>();
@@ -128,6 +135,28 @@ while (true)
 
     renderer.UpdateLocalEntities(entities);
     renderer.UpdateLocalPlayer(localPlayer);
+
+    // Console.Clear();
+
+    // IntPtr xxx = swed.ReadPointer(clientPtr, Offsets.attack);
+    int entIndex = swed.ReadInt(localPlayerPawnPtr, Offsets.m_iIDEntIndex);
+    // Console.WriteLine($"Crosshair/EntityID : {entIndex}");
+
+    if (renderer.triggerBotEnabled && GetAsyncKeyState(0x6) < 0 && entIndex > 0) // mouse 4 or 5
+    {
+        /*
+        swed.WriteInt(clientPtr + Offsets.attack, 65537); // attack +
+        Thread.Sleep(1);
+        swed.WriteInt(clientPtr + Offsets.attack, 256); // attack -
+        */
+
+        // Simulate the mouse down and mouse up events
+        mouse_event(0x0002, 0, 0, 0, 0); // Left down
+        // Thread.Sleep(1);
+        Thread.Sleep(100); // Optional: add a slight delay
+        mouse_event(0x0004, 0, 0, 0, 0); // Left up
+    }
+
 
     // Thread.Sleep(500);
     Thread.Sleep(1);

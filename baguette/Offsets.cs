@@ -32,5 +32,10 @@ namespace baguette
         public static readonly int m_bHasDefuser = 0x40; // bool
         public static readonly int m_bHasHelmet = 0x41; // bool
         public static readonly int m_bHasHeavyArmor = 0x42; // bool
+
+        public static readonly int m_iIDEntIndex = 0x1458; // CEntityIndex
+
+        /* buttons.cs */
+        public static readonly int attack = 0x182D620;
     }
 }

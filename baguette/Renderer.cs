@@ -114,7 +114,8 @@ namespace baguette
         private bool _espBombEnabled = true;
         private bool _espKevlarEnabled = false;
 
-        private bool _tiggerBotEnabled = false;
+        public bool triggerBotEnabled = true;
+        public bool triggerBotShootEveryoneEnabled = false;
 
         private Vector4 _enemyTeamColor = new Vector4(1, 0, 0, 1);
         private Vector4 _allyTeamColor = new Vector4(0, 1, 0, 1);
@@ -140,9 +141,11 @@ namespace baguette
 
 
             ImGui.Begin("Baguette");
-            
-            // ImGui.Image(logoImgPtr, new Vector2(200, 200));
+            // ImGui.Begin("Logo");
+            ImGui.Image(logoImgPtr, new Vector2(200, 200));
+            //ImGui.End();
 
+            //ImGui.Begin("Baguette");
             ImGui.NewLine();
             ImGui.Checkbox("Enable ESP", ref _espEnabled);
             if(ImGui.CollapsingHeader("Esp"))
@@ -167,10 +170,13 @@ namespace baguette
                 ImGui.Checkbox("Enable Kevlar & Helmet", ref _espKevlarEnabled);
             }
             ImGui.NewLine();
-            ImGui.Checkbox("Enable Trigger Bot", ref _tiggerBotEnabled);
+            ImGui.Checkbox("Enable Trigger Bot", ref triggerBotEnabled);
+            /*
             if(ImGui.CollapsingHeader("Trigger Bot"))
             {
+                ImGui.Checkbox("Enable Shoot Everyone", ref triggerBotShootEveryoneEnabled);
             }
+            */
             ImGui.End();
 
             // DrawOverlay

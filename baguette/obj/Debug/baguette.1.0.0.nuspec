@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>baguette</id>
+    <version>1.0.0</version>
+    <authors>baguette</authors>
+    <icon>baguette3.png</icon>
+    <description>Package Description</description>
+    <repository type="git" commit="632faae8eddfb20aaa7638438977cc7de2846643" />
+    <dependencies>
+      <group targetFramework="net8.0">
+        <dependency id="ClickableTransparentOverlay" version="9.1.0" exclude="Build,Analyzers" />
+        <dependency id="swed64" version="1.0.5" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+    <contentFiles>
+      <files include="any/net8.0/assets/Armor_hud_css.png" buildAction="Content" />
+      <files include="any/net8.0/assets/Armor_hud_helmet_css.png" buildAction="Content" />
+      <files include="any/net8.0/assets/Bombdefusal.png" buildAction="Content" />
+    </contentFiles>
+  </metadata>
+  <files>
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\baguette.runtimeconfig.json" target="lib\net8.0\baguette.runtimeconfig.json" />
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\baguette.dll" target="lib\net8.0\baguette.dll" />
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\Armor_hud_css.png" target="content\assets\Armor_hud_css.png" />
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\Armor_hud_css.png" target="contentFiles\any\net8.0\assets\Armor_hud_css.png" />
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\Armor_hud_helmet_css.png" target="content\assets\Armor_hud_helmet_css.png" />
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\Armor_hud_helmet_css.png" target="contentFiles\any\net8.0\assets\Armor_hud_helmet_css.png" />
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\Bombdefusal.png" target="content\assets\Bombdefusal.png" />
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\Bombdefusal.png" target="contentFiles\any\net8.0\assets\Bombdefusal.png" />
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\baguette3.png" target="\baguette3.png" />
+  </files>
+</package>
