@@ -142,7 +142,7 @@ while (true)
     int entIndex = swed.ReadInt(localPlayerPawnPtr, Offsets.m_iIDEntIndex);
     // Console.WriteLine($"Crosshair/EntityID : {entIndex}");
 
-    if (renderer.triggerBotEnabled && GetAsyncKeyState(0x6) < 0 && entIndex > 0) // mouse 4 or 5
+    if (renderer.triggerBotEnabled && (GetAsyncKeyState(0x6) < 0 || renderer.triggerBotAutoModeEnabled) && entIndex > 0) // mouse 4 or 5
     {
         /*
         swed.WriteInt(clientPtr + Offsets.attack, 65537); // attack +
