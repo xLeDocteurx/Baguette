@@ -9,14 +9,12 @@ using System.Xml.Linq;
 
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("This is baguette !");
-Console.WriteLine("Waiting for cs2 to start...");
+Console.WriteLine("Looking for cs2 process...");
 
 while (Process.GetProcessesByName("cs2").Length == 0) {}
 Swed swed = new Swed("cs2");
 
-Console.WriteLine("OK");
-
-// Console.WriteLine("CS2 found");
+Console.WriteLine("CS2 found");
 
 IntPtr clientPtr = swed.GetModuleBase("client.dll");
 // Console.WriteLine("client.dll found");
