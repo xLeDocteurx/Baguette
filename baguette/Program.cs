@@ -2,13 +2,20 @@
 using Swed64;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
+using System.Xml.Linq;
 
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("This is baguette !");
+Console.WriteLine("Waiting for cs2 to start...");
 
+while (Process.GetProcessesByName("cs2").Length == 0) {}
 Swed swed = new Swed("cs2");
+
+Console.WriteLine("OK");
+
 // Console.WriteLine("CS2 found");
 
 IntPtr clientPtr = swed.GetModuleBase("client.dll");
@@ -25,44 +32,19 @@ List<Entity> entities = new List<Entity>();
 Entity localPlayer = new Entity();
 Entity bomb = new Entity();
 
-/* Offsets.cs */
-int dwLocalPlayerPawn = 0x1834B18;
-int dwEntityList = 0x19CFC48;
-int dwViewMatrix = 0x1A31D30;
-int dwWeaponC4 = 0x19D2D60;
-
-/* client.dll.cs */
-int m_vOldOrigin = 0x1324; // Vector
-int m_iTeamNum = 0x3E3; // uint8
-int m_lifeState = 0x348; // uint8
-int m_iHealth = 0x344; // int32
-int m_ArmorValue = 0x2404; // int32
-int m_hPlayerPawn = 0x80C; // CHandle<C_CSPlayerPawn>
-int m_sSanitizedPlayerName = 0x770; // CUtlString
-int m_vecViewOffset = 0xCB0; // CNetworkViewOffsetVector
-
-int m_modelState = 0x170; // CModelState
-int m_pGameSceneNode = 0x328; // CGameSceneNode*
-
-int m_hOwnerEntity = 0x440; // CHandle<C_BaseEntity>
-int m_pItemServices = 0x11B0; // CPlayer_ItemServices*
-int m_bHasDefuser = 0x40; // bool
-int m_bHasHelmet = 0x41; // bool
-int m_bHasHeavyArmor = 0x42; // bool
-
 while (true)
 {
     // Console.WriteLine($"------");
     entities.Clear();
 
-    IntPtr entityListPtr = swed.ReadPointer(clientPtr, dwEntityList);
+    IntPtr entityListPtr = swed.ReadPointer(clientPtr, Offsets.dwEntityList);
     IntPtr listEntryPtr = swed.ReadPointer(entityListPtr, 0x10);
-    IntPtr localPlayerPawnPtr = swed.ReadPointer(clientPtr, dwLocalPlayerPawn);
+    IntPtr localPlayerPawnPtr = swed.ReadPointer(clientPtr, Offsets.dwLocalPlayerPawn);
 
-    ViewMatrix viewMatrix = Renderer.ReadMatrix(clientPtr + dwViewMatrix, swed);
+    ViewMatrix viewMatrix = Renderer.ReadMatrix(clientPtr + Offsets.dwViewMatrix, swed);
 
-    IntPtr c4Entity = swed.ReadPointer(swed.ReadPointer(clientPtr, dwWeaponC4));
-    IntPtr bombOwnerPtr = swed.ReadPointer(c4Entity, m_hOwnerEntity);
+    IntPtr c4Entity = swed.ReadPointer(swed.ReadPointer(clientPtr, Offsets.dwWeaponC4));
+    IntPtr bombOwnerPtr = swed.ReadPointer(c4Entity, Offsets.m_hOwnerEntity);
 
     for (int i = 0; i < 64; i++)
     {
@@ -72,7 +54,7 @@ while (true)
             continue;
         }
 
-        int pawnHandle = swed.ReadInt(currentControllerPtr, m_hPlayerPawn);
+        int pawnHandle = swed.ReadInt(currentControllerPtr, Offsets.m_hPlayerPawn);
         if (pawnHandle == 0)
         {
             continue;
@@ -91,20 +73,20 @@ while (true)
             continue;
         }
 
-        int lifeState = swed.ReadInt(entryPlayerPawn, m_lifeState);
+        int lifeState = swed.ReadInt(entryPlayerPawn, Offsets.m_lifeState);
         if (lifeState != 256)
         {
             continue;
         }
 
-        IntPtr sceneNodePtr = swed.ReadPointer(entryPlayerPawn, m_pGameSceneNode);
+        IntPtr sceneNodePtr = swed.ReadPointer(entryPlayerPawn, Offsets.m_pGameSceneNode);
         if (sceneNodePtr == IntPtr.Zero)
         {
             continue;
         }
 
         // IntPtr boneMatrixPtr = swed.ReadPointer(sceneNodePtr, m_modelState, + 0x80); // 0x80 would be dwBoneMatrix
-        IntPtr boneMatrixPtr = swed.ReadPointer(sceneNodePtr, m_modelState + 0x80); // 0x80 would be dwBoneMatrix
+        IntPtr boneMatrixPtr = swed.ReadPointer(sceneNodePtr, Offsets.m_modelState + 0x80); // 0x80 would be dwBoneMatrix
         if (boneMatrixPtr == IntPtr.Zero)
         {
             continue;
@@ -112,20 +94,20 @@ while (true)
 
         // Populate entity
         Entity entity = new Entity();
-        entity.Team = swed.ReadInt(entryPlayerPawn, m_iTeamNum);
+        entity.Team = swed.ReadInt(entryPlayerPawn, Offsets.m_iTeamNum);
 
-        IntPtr entryItemServicesPtr = swed.ReadPointer(entryPlayerPawn, m_pItemServices);
-        entity.hasDiffuser = swed.ReadBool(entryItemServicesPtr, m_bHasDefuser);
-        entity.hasArmor = swed.ReadBool(entryItemServicesPtr, m_bHasHeavyArmor);
-        entity.hasHelmet = swed.ReadBool(entryItemServicesPtr, m_bHasHelmet);
+        IntPtr entryItemServicesPtr = swed.ReadPointer(entryPlayerPawn, Offsets.m_pItemServices);
+        entity.hasDiffuser = swed.ReadBool(entryItemServicesPtr, Offsets.m_bHasDefuser);
+        entity.hasArmor = swed.ReadBool(entryItemServicesPtr, Offsets.m_bHasHeavyArmor);
+        entity.hasHelmet = swed.ReadBool(entryItemServicesPtr, Offsets.m_bHasHelmet);
 
         entity.hasBomb = (int)bombOwnerPtr == pawnHandle;
 
-        entity.Name = swed.ReadString(currentControllerPtr, m_sSanitizedPlayerName);
-        entity.Health = swed.ReadInt(entryPlayerPawn, m_iHealth);
-        entity.Armor = swed.ReadInt(entryPlayerPawn, m_ArmorValue);
-        entity.PositionV3 = swed.ReadVec(entryPlayerPawn, m_vOldOrigin);
-        entity.ViewOffsetV3 = swed.ReadVec(entryPlayerPawn, m_vecViewOffset);
+        entity.Name = swed.ReadString(currentControllerPtr, Offsets.m_sSanitizedPlayerName);
+        entity.Health = swed.ReadInt(entryPlayerPawn, Offsets.m_iHealth);
+        entity.Armor = swed.ReadInt(entryPlayerPawn, Offsets.m_ArmorValue);
+        entity.PositionV3 = swed.ReadVec(entryPlayerPawn, Offsets.m_vOldOrigin);
+        entity.ViewOffsetV3 = swed.ReadVec(entryPlayerPawn, Offsets.m_vecViewOffset);
         entity.PositionV2 = Renderer.WorldToScreen(viewMatrix, entity.PositionV3, screenSize);
         entity.ViewOffsetV2 = Renderer.WorldToScreen(viewMatrix, Vector3.Add(entity.PositionV3, entity.ViewOffsetV3), screenSize);
 
@@ -137,12 +119,12 @@ while (true)
         entities.Add(entity);
     }
 
-    localPlayer.Team = swed.ReadInt(localPlayerPawnPtr, m_iTeamNum);
-    localPlayer.Health = swed.ReadInt(localPlayerPawnPtr, m_iHealth);
-    localPlayer.Armor = swed.ReadInt(localPlayerPawnPtr, m_ArmorValue);
+    localPlayer.Team = swed.ReadInt(localPlayerPawnPtr, Offsets.m_iTeamNum);
+    localPlayer.Health = swed.ReadInt(localPlayerPawnPtr, Offsets.m_iHealth);
+    localPlayer.Armor = swed.ReadInt(localPlayerPawnPtr, Offsets.m_ArmorValue);
 
-    localPlayer.PositionV3 = swed.ReadVec(localPlayerPawnPtr, m_vOldOrigin);
-    localPlayer.ViewOffsetV3 = swed.ReadVec(localPlayerPawnPtr, m_vecViewOffset);
+    localPlayer.PositionV3 = swed.ReadVec(localPlayerPawnPtr, Offsets.m_vOldOrigin);
+    localPlayer.ViewOffsetV3 = swed.ReadVec(localPlayerPawnPtr, Offsets.m_vecViewOffset);
     localPlayer.PositionV2 = Renderer.WorldToScreen(viewMatrix, localPlayer.PositionV3, screenSize);
     localPlayer.ViewOffsetV2 = Renderer.WorldToScreen(viewMatrix, Vector3.Add(localPlayer.PositionV3, localPlayer.ViewOffsetV3), screenSize);
 

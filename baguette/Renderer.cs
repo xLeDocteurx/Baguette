@@ -106,13 +106,13 @@ namespace baguette
 
         private bool _espEnabled = true;
         private bool _espBoxeEnabled = true;
-        private bool _espLinesEnabled = true;
+        private bool _espLinesEnabled = false;
         private bool _espHealthBarEnabmled = true;
-        private bool _espArmorBarEnabmled = true;
+        private bool _espArmorBarEnabmled = false;
         private bool _espHeadEnabled = true;
         private bool _espBonesEnabled = true;
         private bool _espBombEnabled = true;
-        private bool _espKevlarEnabled = true;
+        private bool _espKevlarEnabled = false;
 
         private bool _tiggerBotEnabled = false;
 
@@ -141,7 +141,7 @@ namespace baguette
 
             ImGui.Begin("Baguette");
             
-            ImGui.Image(logoImgPtr, new Vector2(200, 200));
+            // ImGui.Image(logoImgPtr, new Vector2(200, 200));
 
             ImGui.NewLine();
             ImGui.Checkbox("Enable ESP", ref _espEnabled);
@@ -227,8 +227,6 @@ namespace baguette
                 }
 
             }
-
-            // Thread.Sleep(1000);
         }
 
         void DrawOverlay()
@@ -246,8 +244,9 @@ namespace baguette
 
         void DrawBox(Entity entity)
         {
-            //Vector4 boxColor = _localPlayer.Team == entity.Team ? _allyTeamColor : _enemyTeamColor;
-            Vector4 boxColor = new Vector4(0, 0, 0, 1);
+            Vector4 boxColor = _localPlayer.Team == entity.Team ? _allyTeamColor : _enemyTeamColor;
+            boxColor.W = 0.5f;
+            // Vector4 boxColor = new Vector4(0, 0, 0, 1);
             Vector4 boxFillColor = new Vector4(0, 0, 0, 0.25f);
 
             float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
@@ -256,7 +255,7 @@ namespace baguette
             Vector2 rectTop = new Vector2(entity.ViewOffsetV2.X - entityWidth, entity.ViewOffsetV2.Y);
             Vector2 rectBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
 
-            drawListPtr.AddRectFilled(rectTop, rectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
+            // drawListPtr.AddRectFilled(rectTop, rectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
             drawListPtr.AddRect(rectTop, rectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
         }
 
@@ -276,9 +275,9 @@ namespace baguette
             Vector2 healthFillTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + fillWidth, entity.PositionV2.Y + healthFillHeight);
             Vector2 healthFillBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
 
-            drawListPtr.AddRectFilled(healthRectTop, healthRectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
+            // drawListPtr.AddRectFilled(healthRectTop, healthRectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
             drawListPtr.AddRectFilled(healthFillTop, healthFillBottom, ImGui.ColorConvertFloat4ToU32(healthBarFillColor));
-            drawListPtr.AddRect(healthRectTop, healthRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
+            // drawListPtr.AddRect(healthRectTop, healthRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
         }
 
         void DrawArmorBar(Entity entity)
@@ -297,22 +296,27 @@ namespace baguette
             Vector2 armorFillTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + (fillWidth * 2) + fillWidth, entity.PositionV2.Y + armorFillHeight);
             Vector2 armorFillBottom = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 2), entity.PositionV2.Y);
 
-            drawListPtr.AddRectFilled(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
+            // drawListPtr.AddRectFilled(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
             drawListPtr.AddRectFilled(armorFillTop, armorFillBottom, ImGui.ColorConvertFloat4ToU32(armorBarFillColor));
-            drawListPtr.AddRect(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
+            // drawListPtr.AddRect(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
         }
 
         void DrawHead(Entity entity)
         {
-            Vector4 fillColor = _localPlayer.Team == entity.Team ? _allyTeamColor : _enemyTeamColor;
-            fillColor.W = 0.25f;
-            Vector4 outlineColor = new Vector4(0, 0, 0, 1);
+            if(_localPlayer.Team != entity.Team)
+            {
+                // Vector4 fillColor = _localPlayer.Team == entity.Team ? _allyTeamColor : _enemyTeamColor;
+                Vector4 fillColor = _enemyTeamColor;
+                fillColor.W = 0.5f;
+                // Vector4 outlineColor = new Vector4(0.5f, 0.5f, 0.5f, 1);
 
-            uint currentBoneColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0, 0, 1, 1));
-            uint currentBoneColorBis = ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1));
-            float currentBoneThickness = 4 / entity.Distance;
-
-            drawListPtr.AddCircle(entity.bones2D[2], currentBoneThickness * 10, currentBoneColorBis);
+                // float headSize = 40 / entity.Distance;
+                float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
+                float headSize = (-entityHeight) / 10;
+                ///////
+                drawListPtr.AddCircleFilled(entity.bones2D[2], headSize, ImGui.ColorConvertFloat4ToU32(fillColor));
+                // drawListPtr.AddCircle(entity.bones2D[2], headSize, ImGui.ColorConvertFloat4ToU32(outlineColor));
+            }
         }
 
         void DrawBombOrDiffuser(Entity entity)
@@ -364,7 +368,7 @@ namespace baguette
             if (entity.hasHelmet)
             {
                 float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
-                float entityWidth = entityHeight / 4;
+                float entityWidth = entityHeight / 2;
 
                 float circleRadius = (-entityHeight) / 10;
 
@@ -380,7 +384,7 @@ namespace baguette
             else if (entity.hasArmor)
             {
                 float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
-                float entityWidth = entityHeight / 4;
+                float entityWidth = entityHeight / 2;
 
                 float circleRadius = (-entityHeight) / 10;
 
@@ -399,14 +403,7 @@ namespace baguette
         {
             uint currentBoneColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0, 0, 1, 1));
             uint currentBoneColorBis = ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1));
-            float currentBoneThickness = 4 / entity.Distance;
-
-            /*
-            foreach (Vector2 joint in entity.bones2D)
-            {
-                drawListPtr.AddCircleFilled(joint, 5, currentBoneColor);
-           }
-            */
+            float currentBoneThickness = 2 / entity.Distance;
 
             drawListPtr.AddLine(entity.bones2D[1], entity.bones2D[2], currentBoneColorBis, currentBoneThickness);
             drawListPtr.AddLine(entity.bones2D[1], entity.bones2D[3], currentBoneColorBis, currentBoneThickness);
@@ -422,7 +419,6 @@ namespace baguette
             drawListPtr.AddLine(entity.bones2D[11], entity.bones2D[12], currentBoneColorBis, currentBoneThickness);
 
             drawListPtr.AddCircle(entity.bones2D[2], currentBoneThickness * 10, currentBoneColorBis);
-
         }
 
         public ConcurrentQueue<Entity> GetEntities()
@@ -452,7 +448,11 @@ namespace baguette
 
         bool EntityOnScreen(Entity entity)
         {
-            return (entity.PositionV2.X > 0 && entity.PositionV2.X < screenSize.X && entity.PositionV2.Y > 0 && entity.PositionV2.Y < screenSize.Y);
+            return 
+                (entity.PositionV2.X > 0 && entity.PositionV2.X < screenSize.X && entity.PositionV2.Y > 0 && entity.PositionV2.Y < screenSize.Y)
+                /*||
+                (entity.ViewOffsetV2.X > 0 && entity.ViewOffsetV2.X < screenSize.X && entity.ViewOffsetV2.Y > 0 && entity.ViewOffsetV2.Y < screenSize.Y)*/
+                ;
         }
     }
 }
