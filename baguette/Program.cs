@@ -12,14 +12,14 @@ using System.Xml.Linq;
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("This is baguette !");
 
+Console.WriteLine("Looking for cs2 process...");
+
+while (Process.GetProcessesByName("cs2").Length == 0) { }
+
 Renderer renderer = new Renderer();
 Thread rendererThread = new Thread(new ThreadStart(renderer.Start().Wait));
 
 rendererThread.Start();
-
-Console.WriteLine("Looking for cs2 process...");
-
-while (Process.GetProcessesByName("cs2").Length == 0) {}
 Swed swed = new Swed("cs2");
 
 IntPtr clientPtr = swed.GetModuleBase("client.dll");
