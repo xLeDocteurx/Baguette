@@ -57,6 +57,257 @@
           }
         }
       },
+      "Microsoft.NET.ILLink.Tasks/8.0.10": {
+        "type": "package",
+        "build": {
+          "build/Microsoft.NET.ILLink.Tasks.props": {}
+        }
+      },
+      "SharpGen.Runtime/2.1.2-beta": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/SharpGen.Runtime.dll": {}
+        },
+        "runtime": {
+          "lib/net8.0/SharpGen.Runtime.dll": {}
+        },
+        "build": {
+          "build/_._": {}
+        },
+        "buildMultiTargeting": {
+          "buildMultiTargeting/_._": {}
+        }
+      },
+      "SharpGen.Runtime.COM/2.1.2-beta": {
+        "type": "package",
+        "dependencies": {
+          "SharpGen.Runtime": "2.1.2-beta"
+        },
+        "compile": {
+          "lib/net8.0/SharpGen.Runtime.COM.dll": {}
+        },
+        "runtime": {
+          "lib/net8.0/SharpGen.Runtime.COM.dll": {}
+        },
+        "build": {
+          "build/_._": {}
+        },
+        "buildMultiTargeting": {
+          "buildMultiTargeting/_._": {}
+        }
+      },
+      "SixLabors.ImageSharp/3.0.2": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/SixLabors.ImageSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/SixLabors.ImageSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "build/_._": {}
+        }
+      },
+      "swed64/1.0.5": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/swed64.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/swed64.dll": {}
+        }
+      },
+      "System.Buffers/4.4.0": {
+        "type": "package",
+        "compile": {
+          "ref/netcoreapp2.0/_._": {}
+        },
+        "runtime": {
+          "lib/netcoreapp2.0/_._": {}
+        }
+      },
+      "System.Numerics.Vectors/4.4.0": {
+        "type": "package",
+        "compile": {
+          "ref/netcoreapp2.0/_._": {}
+        },
+        "runtime": {
+          "lib/netcoreapp2.0/_._": {}
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/4.4.0": {
+        "type": "package",
+        "compile": {
+          "ref/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Vortice.D3DCompiler/3.3.4": {
+        "type": "package",
+        "dependencies": {
+          "SharpGen.Runtime": "2.1.2-beta",
+          "SharpGen.Runtime.COM": "2.1.2-beta",
+          "Vortice.DirectX": "3.3.4",
+          "Vortice.Mathematics": "1.7.2"
+        },
+        "compile": {
+          "lib/net8.0/Vortice.D3DCompiler.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Vortice.D3DCompiler.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "build": {
+          "build/_._": {}
+        },
+        "buildMultiTargeting": {
+          "buildMultiTargeting/_._": {}
+        }
+      },
+      "Vortice.Direct3D11/3.3.4": {
+        "type": "package",
+        "dependencies": {
+          "SharpGen.Runtime": "2.1.2-beta",
+          "SharpGen.Runtime.COM": "2.1.2-beta",
+          "Vortice.DXGI": "3.3.4",
+          "Vortice.Mathematics": "1.7.2"
+        },
+        "compile": {
+          "lib/net8.0/Vortice.Direct3D11.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Vortice.Direct3D11.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "build": {
+          "build/_._": {}
+        },
+        "buildMultiTargeting": {
+          "buildMultiTargeting/_._": {}
+        }
+      },
+      "Vortice.DirectX/3.3.4": {
+        "type": "package",
+        "dependencies": {
+          "SharpGen.Runtime": "2.1.2-beta",
+          "SharpGen.Runtime.COM": "2.1.2-beta",
+          "Vortice.Mathematics": "1.7.2"
+        },
+        "compile": {
+          "lib/net8.0/Vortice.DirectX.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Vortice.DirectX.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "build": {
+          "build/_._": {}
+        },
+        "buildMultiTargeting": {
+          "buildMultiTargeting/_._": {}
+        }
+      },
+      "Vortice.DXGI/3.3.4": {
+        "type": "package",
+        "dependencies": {
+          "SharpGen.Runtime": "2.1.2-beta",
+          "SharpGen.Runtime.COM": "2.1.2-beta",
+          "Vortice.DirectX": "3.3.4",
+          "Vortice.Mathematics": "1.7.2"
+        },
+        "compile": {
+          "lib/net8.0/Vortice.DXGI.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Vortice.DXGI.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "build": {
+          "build/_._": {}
+        },
+        "buildMultiTargeting": {
+          "buildMultiTargeting/_._": {}
+        }
+      },
+      "Vortice.Mathematics/1.7.2": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Vortice.Mathematics.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Vortice.Mathematics.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      }
+    },
+    "net8.0/win-x64": {
+      "ClickableTransparentOverlay/9.1.0": {
+        "type": "package",
+        "dependencies": {
+          "ImGui.NET": "1.90.0.1",
+          "SixLabors.ImageSharp": "3.0.2",
+          "Vortice.D3DCompiler": "3.3.4",
+          "Vortice.Direct3D11": "3.3.4"
+        },
+        "compile": {
+          "lib/net7.0/ClickableTransparentOverlay.dll": {}
+        },
+        "runtime": {
+          "lib/net7.0/ClickableTransparentOverlay.dll": {}
+        }
+      },
+      "ImGui.NET/1.90.0.1": {
+        "type": "package",
+        "dependencies": {
+          "System.Buffers": "4.4.0",
+          "System.Numerics.Vectors": "4.4.0",
+          "System.Runtime.CompilerServices.Unsafe": "4.4.0"
+        },
+        "compile": {
+          "lib/net6.0/ImGui.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/ImGui.NET.dll": {
+            "related": ".xml"
+          }
+        },
+        "native": {
+          "runtimes/win-x64/native/cimgui.dll": {}
+        }
+      },
+      "Microsoft.NET.ILLink.Tasks/8.0.10": {
+        "type": "package",
+        "build": {
+          "build/Microsoft.NET.ILLink.Tasks.props": {}
+        }
+      },
       "SharpGen.Runtime/2.1.2-beta": {
         "type": "package",
         "compile": {
@@ -293,6 +544,57 @@
         "runtimes/win-arm64/native/cimgui.dll",
         "runtimes/win-x64/native/cimgui.dll",
         "runtimes/win-x86/native/cimgui.dll"
+      ]
+    },
+    "Microsoft.NET.ILLink.Tasks/8.0.10": {
+      "sha512": "xT8jYjlroY7SLbGtoV9vUTVW/TPgodL4Egc31a444Xe0TMytLZ3UlKQ0kxMZsy/CrWsFB6wtKnSG1SsXcWreew==",
+      "type": "package",
+      "path": "microsoft.net.illink.tasks/8.0.10",
+      "hasTools": true,
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "Sdk/Sdk.props",
+        "THIRD-PARTY-NOTICES.TXT",
+        "analyzers/dotnet/cs/ILLink.CodeFixProvider.dll",
+        "analyzers/dotnet/cs/ILLink.RoslynAnalyzer.dll",
+        "build/Microsoft.NET.ILLink.Analyzers.props",
+        "build/Microsoft.NET.ILLink.Tasks.props",
+        "build/Microsoft.NET.ILLink.targets",
+        "microsoft.net.illink.tasks.8.0.10.nupkg.sha512",
+        "microsoft.net.illink.tasks.nuspec",
+        "tools/net472/ILLink.Tasks.dll",
+        "tools/net472/ILLink.Tasks.dll.config",
+        "tools/net472/Mono.Cecil.Mdb.dll",
+        "tools/net472/Mono.Cecil.Pdb.dll",
+        "tools/net472/Mono.Cecil.Rocks.dll",
+        "tools/net472/Mono.Cecil.dll",
+        "tools/net472/Sdk/Sdk.props",
+        "tools/net472/System.Buffers.dll",
+        "tools/net472/System.Collections.Immutable.dll",
+        "tools/net472/System.Memory.dll",
+        "tools/net472/System.Numerics.Vectors.dll",
+        "tools/net472/System.Reflection.Metadata.dll",
+        "tools/net472/System.Runtime.CompilerServices.Unsafe.dll",
+        "tools/net472/build/Microsoft.NET.ILLink.Analyzers.props",
+        "tools/net472/build/Microsoft.NET.ILLink.Tasks.props",
+        "tools/net472/build/Microsoft.NET.ILLink.targets",
+        "tools/net8.0/ILLink.Tasks.deps.json",
+        "tools/net8.0/ILLink.Tasks.dll",
+        "tools/net8.0/Mono.Cecil.Mdb.dll",
+        "tools/net8.0/Mono.Cecil.Pdb.dll",
+        "tools/net8.0/Mono.Cecil.Rocks.dll",
+        "tools/net8.0/Mono.Cecil.dll",
+        "tools/net8.0/Sdk/Sdk.props",
+        "tools/net8.0/build/Microsoft.NET.ILLink.Analyzers.props",
+        "tools/net8.0/build/Microsoft.NET.ILLink.Tasks.props",
+        "tools/net8.0/build/Microsoft.NET.ILLink.targets",
+        "tools/net8.0/illink.deps.json",
+        "tools/net8.0/illink.dll",
+        "tools/net8.0/illink.runtimeconfig.json",
+        "useSharedDesignerContext.txt"
       ]
     },
     "SharpGen.Runtime/2.1.2-beta": {
@@ -568,6 +870,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "ClickableTransparentOverlay >= 9.1.0",
+      "Microsoft.NET.ILLink.Tasks >= 8.0.10",
       "swed64 >= 1.0.5"
     ]
   },
@@ -624,6 +927,12 @@
             "target": "Package",
             "version": "[9.1.0, )"
           },
+          "Microsoft.NET.ILLink.Tasks": {
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[8.0.10, )",
+            "autoReferenced": true
+          },
           "swed64": {
             "target": "Package",
             "version": "[1.0.5, )"
@@ -640,12 +949,31 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
+            "version": "[8.0.10, 8.0.10]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Runtime.win-x64",
+            "version": "[8.0.10, 8.0.10]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
+            "version": "[8.0.10, 8.0.10]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
+      }
+    },
+    "runtimes": {
+      "win-x64": {
+        "#import": []
       }
     }
   }
