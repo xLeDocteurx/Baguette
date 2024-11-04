@@ -143,8 +143,8 @@ namespace baguette
 
             ImGui.Begin("Baguette");
             // ImGui.Begin("Logo");
-            // ImGui.Image(logoImgPtr, new Vector2(200, 200));
-            //ImGui.End();
+            ImGui.Image(logoImgPtr, new Vector2(200, 200));
+            // ImGui.End();
 
             //ImGui.Begin("Baguette");
             ImGui.NewLine();

@@ -9,13 +9,16 @@ namespace baguette
     internal static class Offsets
     {
         /* Offsets.cs */
-        public static readonly int dwLocalPlayerPawn = 0x1834B18;
-        public static readonly int dwEntityList = 0x19CFC48;
-        public static readonly int dwViewMatrix = 0x1A31D30;
-        public static readonly int dwWeaponC4 = 0x19D2D60;
+        /*public static readonly int dwLocalPlayerPawn = 0x1836BB8;
+        public static readonly int dwEntityList = 0x19D1A98;
+        public static readonly int dwViewMatrix = 0x1A33E30;
+        public static readonly int dwWeaponC4 = 0x19D4E80;*/
+
+        /* buttons.cs */
+        /*public static readonly int attack = 0x182F6B0;*/
 
         /* client.dll.cs */
-        public static readonly int m_vOldOrigin = 0x1324; // Vector
+        /*public static readonly int m_vOldOrigin = 0x1324; // Vector
         public static readonly int m_iTeamNum = 0x3E3; // uint8
         public static readonly int m_lifeState = 0x348; // uint8
         public static readonly int m_iHealth = 0x344; // int32
@@ -33,9 +36,6 @@ namespace baguette
         public static readonly int m_bHasHelmet = 0x41; // bool
         public static readonly int m_bHasHeavyArmor = 0x42; // bool
 
-        public static readonly int m_iIDEntIndex = 0x1458; // CEntityIndex
-
-        /* buttons.cs */
-        public static readonly int attack = 0x182D620;
+        public static readonly int m_iIDEntIndex = 0x1458; // CEntityIndex*/
     }
 }
