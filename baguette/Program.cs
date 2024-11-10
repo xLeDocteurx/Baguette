@@ -18,8 +18,8 @@ while (Process.GetProcessesByName("cs2").Length == 0) { }
 
 Renderer renderer = new Renderer();
 Thread rendererThread = new Thread(new ThreadStart(renderer.Start().Wait));
-
 rendererThread.Start();
+
 Swed swed = new Swed("cs2");
 
 IntPtr clientPtr = swed.GetModuleBase("client.dll");
@@ -40,7 +40,6 @@ Entity bomb = new Entity();
 
 while (true)
 {
-    // Console.WriteLine($"------");
     entities.Clear();
 
     IntPtr entityListPtr = swed.ReadPointer(clientPtr, (int)CS2Dumper.Offsets.ClientDll.dwEntityList);
@@ -134,31 +133,34 @@ while (true)
     localPlayer.PositionV2 = Renderer.WorldToScreen(viewMatrix, localPlayer.PositionV3, screenSize);
     localPlayer.ViewOffsetV2 = Renderer.WorldToScreen(viewMatrix, Vector3.Add(localPlayer.PositionV3, localPlayer.ViewOffsetV3), screenSize);
 
-    renderer.UpdateLocalEntities(entities);
     renderer.UpdateLocalPlayer(localPlayer);
+    renderer.UpdateLocalEntities(entities);
 
-    // Console.Clear();
-
-    // IntPtr xxx = swed.ReadPointer(clientPtr, Offsets.attack);
     int entIndex = swed.ReadInt(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawnBase.m_iIDEntIndex);
-    // Console.WriteLine($"Crosshair/EntityID : {entIndex}");
 
-    if (renderer.triggerBotEnabled && (GetAsyncKeyState(0x6) < 0 || renderer.triggerBotAutoModeEnabled) && entIndex > 0) // mouse 4 or 5
+    if (
+        !TriggerBot.shootLock
+        &&
+        renderer.triggerBotEnabled 
+        &&
+        (GetAsyncKeyState(0x6) < 0 || renderer.triggerBotAutoModeEnabled) 
+        && 
+        entIndex != -1
+    ) // mouse 4 or 5
     {
-        /*
-        swed.WriteInt(clientPtr + Offsets.attack, 65537); // attack +
-        Thread.Sleep(1);
-        swed.WriteInt(clientPtr + Offsets.attack, 256); // attack -
-        */
+        IntPtr entListEntry2Ptr = swed.ReadPointer(entityListPtr, 0x8 * ((entIndex & 0x7FFF) >> 9) + 0x10);
+        IntPtr entPawnPtr = swed.ReadPointer(entListEntry2Ptr, 0x78 * (entIndex & 0x1FF));
+        int entTeam = swed.ReadInt(entPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iTeamNum);
 
-        // Simulate the mouse down and mouse up events
-        mouse_event(0x0002, 0, 0, 0, 0); // Left down
-        // Thread.Sleep(1);
-        Thread.Sleep(250); // Optional: add a slight delay
-        mouse_event(0x0004, 0, 0, 0, 0); // Left up
+        if (localPlayer.Team != entTeam || renderer.triggerBotShootEveryoneEnabled)
+        {
+            Thread shootThread = new Thread(new ThreadStart(() => {
+                TriggerBot.shoot(entIndex, renderer.triggerBotReflexTime, renderer.triggerBotPressedDuration, renderer.triggerBotDelayBetweenClicks);
+            }));
+            shootThread.Start();
+        }
     }
-
-
+   
     // Thread.Sleep(500);
     Thread.Sleep(1);
 }

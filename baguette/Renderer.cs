@@ -105,18 +105,22 @@ namespace baguette
         ImDrawListPtr drawListPtr;
 
         private bool _espEnabled = true;
-        private bool _espBoxeEnabled = true;
+        private bool _espBoxeEnabled = false;
         private bool _espLinesEnabled = false;
-        private bool _espHealthBarEnabmled = true;
+        private bool _espHealthBarEnabmled = false;
         private bool _espArmorBarEnabmled = false;
         private bool _espHeadEnabled = true;
         private bool _espBonesEnabled = true;
-        private bool _espBombEnabled = true;
+        private bool _espBombEnabled = false;
         private bool _espKevlarEnabled = false;
 
         public bool triggerBotEnabled = true;
         public bool triggerBotAutoModeEnabled = false;
+
         public bool triggerBotShootEveryoneEnabled = false;
+        public int triggerBotReflexTime = 50;
+        public int triggerBotPressedDuration = 50;
+        public int triggerBotDelayBetweenClicks = 111;
 
         private Vector4 _enemyTeamColor = new Vector4(1, 0, 0, 1);
         private Vector4 _allyTeamColor = new Vector4(0, 1, 0, 1);
@@ -143,13 +147,13 @@ namespace baguette
 
             ImGui.Begin("Baguette");
             // ImGui.Begin("Logo");
-            ImGui.Image(logoImgPtr, new Vector2(200, 200));
+            // ImGui.Image(logoImgPtr, new Vector2(200, 200));
             // ImGui.End();
 
             //ImGui.Begin("Baguette");
             ImGui.NewLine();
             ImGui.Checkbox("Enable ESP", ref _espEnabled);
-            if(ImGui.CollapsingHeader("Esp"))
+            if(ImGui.CollapsingHeader("Esp Config"))
             {
                 /*
                 if (ImGui.CollapsingHeader("Enemy team color"))
@@ -172,10 +176,14 @@ namespace baguette
             }
             ImGui.NewLine();
             ImGui.Checkbox("Enable Trigger Bot", ref triggerBotEnabled);
-            if(ImGui.CollapsingHeader("Trigger Bot"))
+            if(ImGui.CollapsingHeader("Trigger Bot Config"))
             {
                 ImGui.Checkbox("Enable Auto Mode", ref triggerBotAutoModeEnabled);
-                // ImGui.Checkbox("Enable Shoot Everyone", ref triggerBotShootEveryoneEnabled);
+                ImGui.Checkbox("Enable Shoot Everyone", ref triggerBotShootEveryoneEnabled);
+                
+                ImGui.InputInt("Reflex time", ref triggerBotReflexTime);
+                ImGui.InputInt("Click press duration", ref triggerBotPressedDuration);
+                ImGui.InputInt("Delay between clicks", ref triggerBotDelayBetweenClicks);
             }
             ImGui.End();
 
