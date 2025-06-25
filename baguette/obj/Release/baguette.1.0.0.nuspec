@@ -6,7 +6,7 @@
     <authors>baguette</authors>
     <icon>baguette3.png</icon>
     <description>Package Description</description>
-    <repository type="git" commit="f969e4d33e0b2e0c2c9400604676262e8ddf4e9e" />
+    <repository type="git" commit="0841d8f350642ea497cf71ad1db82d3ea706501b" />
     <dependencies>
       <group targetFramework="net8.0">
         <dependency id="ClickableTransparentOverlay" version="9.1.0" exclude="Build,Analyzers" />
@@ -17,6 +17,7 @@
       <files include="any/net8.0/assets/Armor_hud_css.png" buildAction="Content" />
       <files include="any/net8.0/assets/Armor_hud_helmet_css.png" buildAction="Content" />
       <files include="any/net8.0/assets/Bombdefusal.png" buildAction="Content" />
+      <files include="any/net8.0/assets/cisors.png" buildAction="Content" />
     </contentFiles>
   </metadata>
   <files>
@@ -28,6 +29,8 @@
     <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\Armor_hud_helmet_css.png" target="contentFiles\any\net8.0\assets\Armor_hud_helmet_css.png" />
     <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\Bombdefusal.png" target="content\assets\Bombdefusal.png" />
     <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\Bombdefusal.png" target="contentFiles\any\net8.0\assets\Bombdefusal.png" />
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\cisors.png" target="content\assets\cisors.png" />
+    <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\cisors.png" target="contentFiles\any\net8.0\assets\cisors.png" />
     <file src="C:\Users\lenoi\source\repos\baguette\baguette\assets\baguette3.png" target="\baguette3.png" />
   </files>
 </package>

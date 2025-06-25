@@ -3,12 +3,15 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PackageIcon>baguette3.png</PackageIcon>
+
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PlatformTarget>x64</PlatformTarget>
-    <PackageIcon>baguette3.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +19,7 @@
     <None Remove="assets\Armor_hud_helmet_css.png" />
     <None Remove="assets\baguette3.png" />
     <None Remove="assets\Bombdefusal.png" />
-    <None Remove="assets\pngegg.png" />
+    <None Remove="assets\cisors.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,10 +37,15 @@
     <Content Include="assets\Bombdefusal.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="assets\cisors.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ClickableTransparentOverlay" Version="9.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SocketIOClient" Version="3.1.2" />
     <PackageReference Include="swed64" Version="1.0.5" />
   </ItemGroup>
 

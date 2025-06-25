@@ -3,6 +3,7 @@ C:\Users\lenoi\source\repos\baguette\baguette\bin\Release\net8.0\win-x64\assets\
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Release\net8.0\win-x64\assets\Armor_hud_helmet_css.png
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Release\net8.0\win-x64\assets\baguette3.png
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Release\net8.0\win-x64\assets\Bombdefusal.png
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Release\net8.0\win-x64\assets\cisors.png
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Release\net8.0\win-x64\baguette.deps.json
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Release\net8.0\win-x64\baguette.runtimeconfig.json
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Release\net8.0\win-x64\baguette.dll

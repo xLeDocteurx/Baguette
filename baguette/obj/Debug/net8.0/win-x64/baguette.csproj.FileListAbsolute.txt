@@ -3,12 +3,14 @@ C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\assets\Ar
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\assets\Armor_hud_helmet_css.png
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\assets\baguette3.png
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\assets\Bombdefusal.png
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\assets\cisors.png
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\baguette.deps.json
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\baguette.runtimeconfig.json
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\baguette.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\baguette.pdb
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\ClickableTransparentOverlay.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\ImGui.NET.dll
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\Newtonsoft.Json.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SharpGen.Runtime.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SharpGen.Runtime.COM.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SixLabors.ImageSharp.dll
@@ -213,3 +215,7 @@ C:\Users\lenoi\source\repos\baguette\baguette\obj\Debug\net8.0\win-x64\refint\ba
 C:\Users\lenoi\source\repos\baguette\baguette\obj\Debug\net8.0\win-x64\baguette.pdb
 C:\Users\lenoi\source\repos\baguette\baguette\obj\Debug\net8.0\win-x64\baguette.genruntimeconfig.cache
 C:\Users\lenoi\source\repos\baguette\baguette\obj\Debug\net8.0\win-x64\ref\baguette.dll
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SocketIO.Core.dll
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SocketIO.Serializer.Core.dll
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SocketIO.Serializer.SystemTextJson.dll
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SocketIOClient.dll

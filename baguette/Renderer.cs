@@ -105,22 +105,24 @@ namespace baguette
         ImDrawListPtr drawListPtr;
 
         private bool _espEnabled = true;
+        private bool _drawNamesEnabled = true;
+        private bool _espDrawTeam = false;
         private bool _espBoxeEnabled = false;
         private bool _espLinesEnabled = false;
         private bool _espHealthBarEnabmled = false;
         private bool _espArmorBarEnabmled = false;
         private bool _espHeadEnabled = true;
         private bool _espBonesEnabled = true;
-        private bool _espBombEnabled = false;
+        private bool _espBombEnabled = true;
         private bool _espKevlarEnabled = false;
 
         public bool triggerBotEnabled = true;
         public bool triggerBotAutoModeEnabled = false;
 
         public bool triggerBotShootEveryoneEnabled = false;
-        public int triggerBotReflexTime = 50;
-        public int triggerBotPressedDuration = 50;
-        public int triggerBotDelayBetweenClicks = 111;
+        public int triggerBotReflexTime = 17;
+        public int triggerBotPressedDuration = 150;
+        public int triggerBotDelayBetweenClicks = 350;
 
         private Vector4 _enemyTeamColor = new Vector4(1, 0, 0, 1);
         private Vector4 _allyTeamColor = new Vector4(0, 1, 0, 1);
@@ -165,6 +167,8 @@ namespace baguette
                     ImGui.ColorPicker4("##color", ref _allyTeamColor);
                 }
                 */
+                ImGui.Checkbox("Enable Draw Names", ref _drawNamesEnabled);
+                ImGui.Checkbox("Enable Draw Team", ref _espDrawTeam);
                 ImGui.Checkbox("Enable Boxe ESP", ref _espBoxeEnabled);
                 ImGui.Checkbox("Enable ESP Lines", ref _espLinesEnabled);
                 ImGui.Checkbox("Enable Healthbar", ref _espHealthBarEnabmled);
@@ -195,8 +199,13 @@ namespace baguette
 
                 foreach (Entity entity in _entities)
                 {
-                    if(EntityOnScreen(entity))
-                    {
+                    // if(EntityOnScreen(entity))
+                    if(
+                        EntityOnScreen(entity) && _espDrawTeam
+                        ||
+                        EntityOnScreen(entity) && !_espDrawTeam && entity.Team != _localPlayer.Team
+                    )
+                        {
                         if (_espBoxeEnabled) {
                             DrawBox(entity);
                         }
@@ -237,6 +246,11 @@ namespace baguette
                         {
                             DrawKevlarAndHelmet(entity);
                         }
+
+                        if(_drawNamesEnabled)
+                        {
+                            DrawName(entity);
+                        }
                     }
                 }
 
@@ -265,7 +279,6 @@ namespace baguette
 
             float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
             float entityWidth = entityHeight / 4;
-
             Vector2 rectTop = new Vector2(entity.ViewOffsetV2.X - entityWidth, entity.ViewOffsetV2.Y);
             Vector2 rectBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
 
@@ -417,7 +430,7 @@ namespace baguette
         {
             uint currentBoneColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0, 0, 1, 1));
             uint currentBoneColorBis = ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1));
-            float currentBoneThickness = 2 / entity.Distance;
+            float currentBoneThickness = 3 / entity.Distance;
 
             drawListPtr.AddLine(entity.bones2D[1], entity.bones2D[2], currentBoneColorBis, currentBoneThickness);
             drawListPtr.AddLine(entity.bones2D[1], entity.bones2D[3], currentBoneColorBis, currentBoneThickness);
@@ -433,6 +446,14 @@ namespace baguette
             drawListPtr.AddLine(entity.bones2D[11], entity.bones2D[12], currentBoneColorBis, currentBoneThickness);
 
             drawListPtr.AddCircle(entity.bones2D[2], currentBoneThickness * 10, currentBoneColorBis);
+        }
+
+        void DrawName(Entity entity)
+        {
+            Vector4 nameColor = new Vector4(1, 1, 1, 1);
+            int yOffset = 20;
+            Vector2 textPostition = new Vector2(entity.ViewOffsetV2.X, entity.ViewOffsetV2.Y - yOffset);
+            drawListPtr.AddText(textPostition, ImGui.ColorConvertFloat4ToU32(nameColor), $"{entity.Name}");
         }
 
         public ConcurrentQueue<Entity> GetEntities()

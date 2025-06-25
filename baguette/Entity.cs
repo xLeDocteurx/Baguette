@@ -37,6 +37,7 @@ namespace baguette
         public int Armor { get; set; }
         public float Distance { get; set; }
 
+        public float Angle { get; set; }
         public Vector3 PositionV3 { get; set; }
         public Vector3 ViewOffsetV3 { get; set; }
         public Vector2 PositionV2 { get; set; }

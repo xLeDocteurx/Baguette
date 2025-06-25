@@ -9,6 +9,22 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 
+using System.Net.WebSockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using SocketIO;
+using SocketIO.Core;
+using SocketIO.Serializer.Core;
+using SocketIO.Serializer.SystemTextJson;
+using SocketIOClient;
+using SocketIOClient.Extensions;
+using SocketIOClient.Transport;
+using SocketIOClient.Transport.Http;
+using SocketIOClient.Transport.WebSockets;
+using Newtonsoft.Json;
+using System.IO;
+
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("This is baguette !");
 
@@ -21,8 +37,9 @@ Thread rendererThread = new Thread(new ThreadStart(renderer.Start().Wait));
 rendererThread.Start();
 
 Swed swed = new Swed("cs2");
-
 IntPtr clientPtr = swed.GetModuleBase("client.dll");
+IntPtr engine2Ptr = swed.GetModuleBase("engine2.dll");
+IntPtr matchmakingPtr = swed.GetModuleBase("matchmaking.dll");
 
 Console.WriteLine("CS2 found");
 
@@ -37,6 +54,34 @@ Vector2 screenSize = renderer.screenSize;
 List<Entity> entities = new List<Entity>();
 Entity localPlayer = new Entity();
 Entity bomb = new Entity();
+
+Uri serverUri = new Uri("ws://localhost:3000");
+var client = new SocketIOClient.SocketIO(serverUri);
+
+client.OnError += async (sender, r) =>
+{
+    Console.WriteLine("Disconnected!");
+    try
+    {
+        await client.DisconnectAsync();
+        await client.ConnectAsync();
+        Console.WriteLine("Reconnected!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error : " + ex.Message);
+    }
+};
+
+try
+{
+    await client.ConnectAsync();
+    Console.WriteLine("Connected!");
+}
+catch (Exception ex)
+{
+    Console.WriteLine("Error : " + ex.Message);
+}
 
 while (true)
 {
@@ -108,9 +153,12 @@ while (true)
 
         entity.hasBomb = (int)bombOwnerPtr == pawnHandle;
 
-        entity.Name = swed.ReadString(currentControllerPtr, (int)CS2Dumper.Schemas.ClientDll.CCSPlayerController.m_sSanitizedPlayerName);
+        //entity.Name = swed.ReadString(currentControllerPtr, (int)CS2Dumper.Schemas.ClientDll.CBasePlayerController.m_iszPlayerName, 16);
+        entity.Name = swed.ReadString(currentControllerPtr, (int)CS2Dumper.Schemas.ClientDll.CBasePlayerController.m_iszPlayerName, 8);
         entity.Health = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iHealth);
         entity.Armor = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_ArmorValue);
+
+        entity.Angle = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.v_angle).Y - 90;
         entity.PositionV3 = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_vOldOrigin);
         entity.ViewOffsetV3 = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseModelEntity.m_vecViewOffset);
         entity.PositionV2 = Renderer.WorldToScreen(viewMatrix, entity.PositionV3, screenSize);
@@ -148,19 +196,60 @@ while (true)
         entIndex != -1
     ) // mouse 4 or 5
     {
-        IntPtr entListEntry2Ptr = swed.ReadPointer(entityListPtr, 0x8 * ((entIndex & 0x7FFF) >> 9) + 0x10);
-        IntPtr entPawnPtr = swed.ReadPointer(entListEntry2Ptr, 0x78 * (entIndex & 0x1FF));
-        int entTeam = swed.ReadInt(entPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iTeamNum);
+        Thread shootThread = new Thread(new ThreadStart(() => {
+            TriggerBot.shoot(entIndex, renderer.triggerBotReflexTime, renderer.triggerBotPressedDuration, renderer.triggerBotDelayBetweenClicks);
+        }));
+        shootThread.Start();
+    }
 
-        if (localPlayer.Team != entTeam || renderer.triggerBotShootEveryoneEnabled)
+    try
+    {
+        string jsonToSend = JsonConvert.SerializeObject(entities);
+        await client.EmitAsync("players", jsonToSend);
+    }
+    catch (Exception ex)
+    {
+        //Console.WriteLine("Error players : " + ex.Message);
+    }
+
+    try
+    {
+
+        //IntPtr mapNamePtr = swed.ReadPointer(clientPtr, (int)CS2Dumper.Offsets.ClientDll.dwGlobalVars);
+        //Console.WriteLine($"mapNamePtr : {mapNamePtr}");
+        //string mapName = swed.ReadString(mapNamePtr, (int)CS2Dumper.Offsets.MatchmakingDll.dwGameTypes_mapName, 64);
+
+        //IntPtr game_client_ptr = engine2Ptr + CS2Dumper.Offsets.Engine2Dll.dwNetworkGameClient;
+        //Console.WriteLine($"game_client_ptr : {game_client_ptr}");
+
+        ////string mapNameA = swed.ReadString(matchmakingPtr + CS2Dumper.Offsets.MatchmakingDll.dwGameTypes + CS2Dumper.Offsets.MatchmakingDll.dwGameTypes_mapName, 8);
+        ////string mapNameB = swed.ReadString(matchmakingPtr + CS2Dumper.Offsets.MatchmakingDll.dwGameTypes_mapName, 8);
+
+        //IntPtr mapNamePtr = swed.ReadPointer(matchmakingPtr, CS2Dumper.Offsets.MatchmakingDll.dwGameTypes, CS2Dumper.Offsets.MatchmakingDll.dwGameTypes_mapName);
+        //Console.WriteLine($"mapNamePtr : {mapNamePtr}");
+
+        //string mapName = swed.ReadString(mapNamePtr, 8);
+        //Console.WriteLine($"mapName : {mapName}");
+
+        //string jsonToSend = $"{{\"data\": \"{mapName}\" }}";
+        string jsonToSend = $"{{\"data\": \"de_dust2\" }}";
+        await client.EmitAsync("map", jsonToSend);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error map : " + ex.Message);
+        try
         {
-            Thread shootThread = new Thread(new ThreadStart(() => {
-                TriggerBot.shoot(entIndex, renderer.triggerBotReflexTime, renderer.triggerBotPressedDuration, renderer.triggerBotDelayBetweenClicks);
-            }));
-            shootThread.Start();
+            await client.DisconnectAsync();
+            await client.ConnectAsync();
+            Console.WriteLine("Reconnected!");
+        }
+        catch (Exception exx)
+        {
+            Console.WriteLine("Error : " + exx.Message);
         }
     }
-   
-    // Thread.Sleep(500);
-    Thread.Sleep(1);
+
+    Thread.Sleep((int)Math.Round(1000.0 / 60));
+    //Thread.Sleep((int)Math.Round(5000.0));
 }
