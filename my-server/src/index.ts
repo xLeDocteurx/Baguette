@@ -27,7 +27,10 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+// const __dirname = dirname(fileURLToPath(import.meta.url));
+// const __dirname = __dirname; // déjà défini automatiquement
+// const __dirname = require('path').dirname(__filename);
+
 
 // let lastReceivedMap = "";
 // let lastReceivedPlayers = [];

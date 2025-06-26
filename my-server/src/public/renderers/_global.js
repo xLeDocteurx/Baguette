@@ -2,7 +2,7 @@
 //
 // Provides shared variables and functions for all renderers.
 
-global = {
+const global = {
 	// Config loaded from disk
 	config: {},
 	// Effects triggered by key-binds

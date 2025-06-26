@@ -3,32 +3,22 @@
 
 <head>
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Socket.IO chat</title>
+  <title>Socket.IO</title>
   <style>
     body {
       margin: 0;
       padding-bottom: 3rem;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-
   </style>
 </head>
 
 <body>
-  <ul id="messages"></ul>
+<h1>Hello World</h1>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
-
-  const messages = document.getElementById('messages');
-  
-  socket.on('entities', (msg) => {
-    const item = document.createElement('li');
-    item.textContent = msg;
-    messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
-  });
 </script>
 
 </html>

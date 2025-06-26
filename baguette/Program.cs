@@ -55,7 +55,7 @@ List<Entity> entities = new List<Entity>();
 Entity localPlayer = new Entity();
 Entity bomb = new Entity();
 
-Uri serverUri = new Uri("ws://localhost:3000");
+Uri serverUri = new Uri("ws://94.125.162.126:3000");
 var client = new SocketIOClient.SocketIO(serverUri);
 
 client.OnError += async (sender, r) =>
@@ -238,16 +238,12 @@ while (true)
     catch (Exception ex)
     {
         Console.WriteLine("Error map : " + ex.Message);
-        try
-        {
+
+        Thread shootThread = new Thread(new ThreadStart(async () => {
             await client.DisconnectAsync();
             await client.ConnectAsync();
-            Console.WriteLine("Reconnected!");
-        }
-        catch (Exception exx)
-        {
-            Console.WriteLine("Error : " + exx.Message);
-        }
+        }));
+        shootThread.Start();
     }
 
     Thread.Sleep((int)Math.Round(1000.0 / 60));

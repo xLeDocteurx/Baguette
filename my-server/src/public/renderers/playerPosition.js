@@ -33,7 +33,6 @@ socket.on("players", event => {
 		if (player.Health <= 0) {
 			// TODO : remove ???
 			classes.push("dead")
-			alert("!!!")
 			global.playerBuffers.map(el => [])
 			console.log('global.playerBuffers : ', global.playerBuffers)
 		}
