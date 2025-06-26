@@ -25,6 +25,8 @@ using SocketIOClient.Transport.WebSockets;
 using Newtonsoft.Json;
 using System.IO;
 
+bool isConnecting = false;
+
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("This is baguette !");
 
@@ -61,22 +63,25 @@ var client = new SocketIOClient.SocketIO(serverUri);
 client.OnError += async (sender, r) =>
 {
     Console.WriteLine("Disconnected!");
-    try
-    {
-        await client.DisconnectAsync();
-        await client.ConnectAsync();
-        Console.WriteLine("Reconnected!");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("Error : " + ex.Message);
-    }
+
+    //try
+    //{
+    //    await client.DisconnectAsync();
+    //    await client.ConnectAsync();
+    //    Console.WriteLine("Reconnected!");
+    //}
+    //catch (Exception ex)
+    //{
+    //    Console.WriteLine("Error : " + ex.Message);
+    //}
 };
 
 try
 {
+    isConnecting = true;
     await client.ConnectAsync();
     Console.WriteLine("Connected!");
+    isConnecting = false;
 }
 catch (Exception ex)
 {
@@ -239,11 +244,16 @@ while (true)
     {
         Console.WriteLine("Error map : " + ex.Message);
 
-        Thread shootThread = new Thread(new ThreadStart(async () => {
-            await client.DisconnectAsync();
-            await client.ConnectAsync();
-        }));
-        shootThread.Start();
+        if (!isConnecting)
+        {
+            isConnecting = true;
+            Thread reconnectThread = new Thread(new ThreadStart(async () => {
+                await client.DisconnectAsync();
+                await client.ConnectAsync();
+                isConnecting = false;
+            }));
+            reconnectThread.Start();
+        }
     }
 
     Thread.Sleep((int)Math.Round(1000.0 / 60));

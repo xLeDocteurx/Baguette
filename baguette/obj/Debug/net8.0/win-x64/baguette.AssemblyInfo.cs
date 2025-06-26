@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("baguette")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1d16110ab87c51263d7a7af00de15387c1463bfd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+23c020cf876438d7b94f3eba510176b17e50e5ba")]
 [assembly: System.Reflection.AssemblyProductAttribute("baguette")]
 [assembly: System.Reflection.AssemblyTitleAttribute("baguette")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
