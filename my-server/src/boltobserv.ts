@@ -74,13 +74,13 @@ export const config = {
 		// Only works on SimpleRadar maps, can either be "never", "buytime" or "always"
 		"showBuyzones": "buytime",
 		// Show Boltobserv, Simple Radar and Lexogrine logos
-		"showLogos": true,
+		"showLogos": false,
 
 		// Show the player name on the dot, options are:
 		// "never"  only show the spec number (observer slot)
 		// "both"   show the name of the player under the dot
 		// "always" replace the spec number by the player name
-		"showName": "never",
+		"showName": "both",
 		// Truncate the name of the player after this many characters
 		"maxNameLength": 8,
 
@@ -100,6 +100,7 @@ export const config = {
 
 		// Frames to smooth out player movement
 		"playerSmoothing": 13,
+		// "playerSmoothing": 1,
 		// Frames to smooth out flying projectile movement
 		"projectileSmoothing": 5,
 		// Opacity between 0 and 1 of the dead player crosses, set to 0 to fully hide

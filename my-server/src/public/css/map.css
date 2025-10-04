@@ -152,8 +152,8 @@ div.dot.dead > div {
 
 div.label {
 	background: none;
-	/* display: flex; */
-	display: none;
+	display: flex;
+	/* display: none; */
 	justify-content: center;
 	color: black;
 	font-weight: bold;

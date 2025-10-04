@@ -35,6 +35,7 @@ namespace baguette
         public string Name { get; set; }
         public int Health { get; set; }
         public int Armor { get; set; }
+        public int Ammo { get; set; }
         public float Distance { get; set; }
 
         public float Angle { get; set; }

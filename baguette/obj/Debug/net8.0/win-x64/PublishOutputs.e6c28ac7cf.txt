@@ -1,0 +1,8 @@
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\publish\baguette.pdb
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\publish\assets\Armor_hud_css.png
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\publish\assets\Armor_hud_helmet_css.png
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\publish\assets\baguette3.png
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\publish\assets\Bombdefusal.png
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\publish\assets\cisors.png
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\publish\cimgui.dll
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\publish\baguette.exe

@@ -24,8 +24,10 @@ using SocketIOClient.Transport.Http;
 using SocketIOClient.Transport.WebSockets;
 using Newtonsoft.Json;
 using System.IO;
+using System.Data.Common;
 
 bool isConnecting = false;
+bool sendWebSocketMessage = false;
 
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("This is baguette !");
@@ -41,7 +43,8 @@ rendererThread.Start();
 Swed swed = new Swed("cs2");
 IntPtr clientPtr = swed.GetModuleBase("client.dll");
 IntPtr engine2Ptr = swed.GetModuleBase("engine2.dll");
-IntPtr matchmakingPtr = swed.GetModuleBase("matchmaking.dll");
+//IntPtr serverPtr = swed.GetModuleBase("server.dll");
+//IntPtr matchmakingPtr = swed.GetModuleBase("matchmaking.dll");
 
 Console.WriteLine("CS2 found");
 
@@ -57,36 +60,74 @@ List<Entity> entities = new List<Entity>();
 Entity localPlayer = new Entity();
 Entity bomb = new Entity();
 
-Uri serverUri = new Uri("ws://94.125.162.126:3000");
-var client = new SocketIOClient.SocketIO(serverUri);
-
-client.OnError += async (sender, r) =>
+// Uri serverUri = new Uri("ws://94.125.162.126:3000");
+Uri serverUri = new Uri("ws://localhost:3000");
+SocketIOClient.SocketIO client = null!;
+async void connectToWebSocket()
 {
-    Console.WriteLine("Disconnected!");
+    Console.WriteLine("Connecting");
+    try
+    {
+        client = new SocketIOClient.SocketIO(serverUri, new SocketIOOptions
+        {
+            Reconnection = true,
+            ReconnectionAttempts = int.MaxValue,
+            ReconnectionDelay = 1000
+        });
 
-    //try
-    //{
-    //    await client.DisconnectAsync();
-    //    await client.ConnectAsync();
-    //    Console.WriteLine("Reconnected!");
-    //}
-    //catch (Exception ex)
-    //{
-    //    Console.WriteLine("Error : " + ex.Message);
-    //}
-};
+        client.OnError += async (sender, r) =>
+        {
+            Console.WriteLine("Error!");
+        };
 
-try
-{
-    isConnecting = true;
-    await client.ConnectAsync();
-    Console.WriteLine("Connected!");
-    isConnecting = false;
+        client.OnDisconnected += async (object? sender, string e) =>
+        {
+            Console.WriteLine("Disconnected!");
+        };
+
+        client.OnReconnectFailed += (sender, args) =>
+        {
+            Console.WriteLine("OnReconnectFailed");
+        };
+
+        client.OnReconnectError += (sender, args) =>
+        {
+            Console.WriteLine("OnReconnectError");
+        };
+
+        client.OnReconnectAttempt += (sender, args) =>
+        {
+            Console.WriteLine("OnReconnectAttempt");
+        };
+
+        client.OnReconnected += (sender, args) =>
+        {
+            Console.WriteLine("Reconnected");
+        };
+
+        await client.ConnectAsync();
+        Console.WriteLine("Connected!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error : " + ex.Message);
+    }
 }
-catch (Exception ex)
+
+if (renderer._serverEnabled)
 {
-    Console.WriteLine("Error : " + ex.Message);
+    connectToWebSocket();
 }
+
+Thread webSocketMessageTImerThread = new Thread(new ThreadStart(async () =>
+{
+    while (true)
+    {
+        sendWebSocketMessage = true;
+        Thread.Sleep((int)Math.Round(1000.0 / 12));
+    }
+}));
+webSocketMessageTImerThread.Start();
 
 while (true)
 {
@@ -128,11 +169,11 @@ while (true)
             continue;
         }
 
-        int lifeState = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_lifeState);
-        if (lifeState != 256)
-        {
-            continue;
-        }
+        //int lifeState = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_lifeState);
+        //if (lifeState != 256)
+        //{
+        //    continue;
+        //}
 
         IntPtr sceneNodePtr = swed.ReadPointer(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_pGameSceneNode);
         if (sceneNodePtr == IntPtr.Zero)
@@ -153,17 +194,26 @@ while (true)
 
         IntPtr entryItemServicesPtr = swed.ReadPointer(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_pItemServices);
         entity.hasDiffuser = swed.ReadBool(entryItemServicesPtr, (int)CS2Dumper.Schemas.ClientDll.CCSPlayer_ItemServices.m_bHasDefuser);
-        entity.hasArmor = swed.ReadBool(entryItemServicesPtr, (int)CS2Dumper.Schemas.ClientDll.CCSPlayer_ItemServices.m_bHasHeavyArmor);
+        // TODO : put back
+        // entity.hasArmor = swed.ReadBool(entryItemServicesPtr, (int)CS2Dumper.Schemas.ClientDll.CCSPlayer_ItemServices.m_bHasHeavyArmor);
         entity.hasHelmet = swed.ReadBool(entryItemServicesPtr, (int)CS2Dumper.Schemas.ClientDll.CCSPlayer_ItemServices.m_bHasHelmet);
 
         entity.hasBomb = (int)bombOwnerPtr == pawnHandle;
 
-        //entity.Name = swed.ReadString(currentControllerPtr, (int)CS2Dumper.Schemas.ClientDll.CBasePlayerController.m_iszPlayerName, 16);
-        entity.Name = swed.ReadString(currentControllerPtr, (int)CS2Dumper.Schemas.ClientDll.CBasePlayerController.m_iszPlayerName, 8);
+        entity.Name = swed.ReadString(currentControllerPtr, (int)CS2Dumper.Schemas.ClientDll.CBasePlayerController.m_iszPlayerName, 16).Split('?')[0];
+        //entity.Name = entity.Name.Replace("?", "");
         entity.Health = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iHealth);
         entity.Armor = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_ArmorValue);
 
-        entity.Angle = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.v_angle).Y - 90;
+
+
+        public const nint m_pWeaponServices = 0x1408; // CPlayer_WeaponServices*
+        IntPtr currentWeaponPtr = swed.ReadPointer(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_pWeaponServices);
+        
+        int ammoInClip = swed.ReadInt(currentWeaponPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseCombatWeapon.m_iClip1);
+        int ammoReserve = swed.ReadInt(currentWeaponPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseCombatWeapon.m_iPrimaryAmmoCount);
+        entity.Ammo = ammoInClip;
+
         entity.PositionV3 = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_vOldOrigin);
         entity.ViewOffsetV3 = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseModelEntity.m_vecViewOffset);
         entity.PositionV2 = Renderer.WorldToScreen(viewMatrix, entity.PositionV3, screenSize);
@@ -174,8 +224,18 @@ while (true)
         entity.bones3D = Renderer.ReadBones(boneMatrixPtr, swed);
         entity.bones2D = Renderer.ReadBones2D(entity.bones3D, viewMatrix, screenSize);
 
+        //Vector3 head = entity.bones3D[/*HeadBoneIndex*/ 8];
+        Vector3 head = entity.bones3D[8];
+        Vector3 feet = entity.PositionV3;
+        Vector3 dir = Vector3.Normalize(head - feet);
+        float angle = MathF.Atan2(dir.Y, dir.X) * (180f / MathF.PI);
+
+        //entity.Angle = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.v_angle).Y - 90;
+        entity.Angle = angle - 90;
+
         entities.Add(entity);
     }
+    entities.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
 
     localPlayer.Team = swed.ReadInt(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iTeamNum);
     localPlayer.Health = swed.ReadInt(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iHealth);
@@ -189,7 +249,7 @@ while (true)
     renderer.UpdateLocalPlayer(localPlayer);
     renderer.UpdateLocalEntities(entities);
 
-    int entIndex = swed.ReadInt(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawnBase.m_iIDEntIndex);
+    int entIndex = swed.ReadInt(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_iIDEntIndex);
 
     if (
         !TriggerBot.shootLock
@@ -207,55 +267,79 @@ while (true)
         shootThread.Start();
     }
 
-    try
+    if (renderer._serverEnabled && client != null && client.Connected && !isConnecting && sendWebSocketMessage)
     {
-        string jsonToSend = JsonConvert.SerializeObject(entities);
-        await client.EmitAsync("players", jsonToSend);
-    }
-    catch (Exception ex)
-    {
-        //Console.WriteLine("Error players : " + ex.Message);
-    }
+        sendWebSocketMessage = false;
+        //if(serverUri.conn)
 
-    try
-    {
-
-        //IntPtr mapNamePtr = swed.ReadPointer(clientPtr, (int)CS2Dumper.Offsets.ClientDll.dwGlobalVars);
-        //Console.WriteLine($"mapNamePtr : {mapNamePtr}");
-        //string mapName = swed.ReadString(mapNamePtr, (int)CS2Dumper.Offsets.MatchmakingDll.dwGameTypes_mapName, 64);
-
-        //IntPtr game_client_ptr = engine2Ptr + CS2Dumper.Offsets.Engine2Dll.dwNetworkGameClient;
-        //Console.WriteLine($"game_client_ptr : {game_client_ptr}");
-
-        ////string mapNameA = swed.ReadString(matchmakingPtr + CS2Dumper.Offsets.MatchmakingDll.dwGameTypes + CS2Dumper.Offsets.MatchmakingDll.dwGameTypes_mapName, 8);
-        ////string mapNameB = swed.ReadString(matchmakingPtr + CS2Dumper.Offsets.MatchmakingDll.dwGameTypes_mapName, 8);
-
-        //IntPtr mapNamePtr = swed.ReadPointer(matchmakingPtr, CS2Dumper.Offsets.MatchmakingDll.dwGameTypes, CS2Dumper.Offsets.MatchmakingDll.dwGameTypes_mapName);
-        //Console.WriteLine($"mapNamePtr : {mapNamePtr}");
-
-        //string mapName = swed.ReadString(mapNamePtr, 8);
-        //Console.WriteLine($"mapName : {mapName}");
-
-        //string jsonToSend = $"{{\"data\": \"{mapName}\" }}";
-        string jsonToSend = $"{{\"data\": \"de_dust2\" }}";
-        await client.EmitAsync("map", jsonToSend);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("Error map : " + ex.Message);
-
-        if (!isConnecting)
+        //bool hasError = false;
+        try
         {
-            isConnecting = true;
-            Thread reconnectThread = new Thread(new ThreadStart(async () => {
-                await client.DisconnectAsync();
-                await client.ConnectAsync();
-                isConnecting = false;
-            }));
-            reconnectThread.Start();
+            string jsonToSend = JsonConvert.SerializeObject(entities);
+            await client.EmitAsync("players", jsonToSend);
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error players : " + ex.Message);
+
+            //if (ex.Message.Contains("The remote party closed the WebSocket connection") && isConnecting == false)
+            //{
+            isConnecting = true;
+            Console.WriteLine("Connection lost, reconnecting...");
+            try
+            {
+                connectToWebSocket();
+                isConnecting = false;
+                Console.WriteLine("Reconnected!");
+            }
+            catch (Exception reconnectEx)
+            {
+                Console.WriteLine("Reconnect failed: " + reconnectEx.Message);
+            }
+            //finally
+            //{
+            //    isConnecting = false;
+            //}
+            //}
+        }
+
+        try
+        {
+            string mapName = Encoding.UTF8.GetString(renderer._mapNamebuffer).Split('\0')[0];
+
+            string jsonToSend = $"{{\"data\": \"{mapName}\" }}";
+            await client.EmitAsync("map", jsonToSend);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error map : " + ex.Message);
+        }
+
+        //if (hasError)
+        //{
+        //    if (!isConnecting)
+        //    {
+        //        isConnecting = true;
+        //        Thread reconnectThread = new Thread(new ThreadStart(async () => {
+        //            await client.DisconnectAsync();
+        //            try
+        //            {
+        //                await client.ConnectAsync();
+        //                Console.WriteLine("Reconnected!");
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Console.WriteLine("Error : " + ex.Message);
+        //            }
+        //            isConnecting = false;
+        //        }));
+        //        reconnectThread.Start();
+        //    }
+        //}
     }
+
 
     Thread.Sleep((int)Math.Round(1000.0 / 60));
+    //Thread.Sleep((int)Math.Round(1000.0 / 30));
     //Thread.Sleep((int)Math.Round(5000.0));
 }

@@ -25,7 +25,10 @@ import { welcome } from './boltobserv';
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  pingInterval: 25000, // toutes les 25s
+  pingTimeout: 60000    // attente max 5s pour le pong
+});
 
 // const __dirname = dirname(fileURLToPath(import.meta.url));
 // const __dirname = __dirname; // déjà défini automatiquement
@@ -65,15 +68,22 @@ io.on('connect', (socket) => {
     socket.on('map', (msg) => {
         // console.log('map message : ' + msg);
         // lastReceivedMap = msg;
-
-        io.emit('map', JSON.parse(msg))
+        try {
+            io.emit('map', JSON.parse(msg))
+        } catch (error) {
+            console.log('WTF map : ', error)
+        }
     });
 
     socket.on('players', (msg) => {
         // console.log('players message : ' + msg);
         // lastReceivedPlayers = msg;
 
-        io.emit('players', JSON.parse(msg))
+        try {
+            io.emit('players', JSON.parse(msg))
+        } catch (error) {
+            console.log('WTF players : ', error)
+        }
     });
 });
 

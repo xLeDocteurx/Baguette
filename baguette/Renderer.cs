@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using System.Xml;
 using ClickableTransparentOverlay;
 using ImGuiNET;
+using SixLabors.ImageSharp.Memory;
 using Swed64;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace baguette
 {
@@ -104,11 +106,13 @@ namespace baguette
 
         ImDrawListPtr drawListPtr;
 
+        public byte[] _mapNamebuffer = new byte[100];
+        public bool _serverEnabled = true;
         private bool _espEnabled = true;
         private bool _drawNamesEnabled = true;
         private bool _espDrawTeam = false;
         private bool _espBoxeEnabled = false;
-        private bool _espLinesEnabled = false;
+        private bool _espLinesEnabled = true;
         private bool _espHealthBarEnabmled = false;
         private bool _espArmorBarEnabmled = false;
         private bool _espHeadEnabled = true;
@@ -136,6 +140,8 @@ namespace baguette
             AddOrGetImagePointer("./assets/cisors.png", false, out diffuserImgPtr, out _, out _);
             AddOrGetImagePointer("./assets/Armor_hud_css.png", false, out kevlarImgPtr, out _, out _);
             AddOrGetImagePointer("./assets/Armor_hud_helmet_css.png", false, out helmetImgPtr, out _, out _);
+
+            Encoding.UTF8.GetBytes("de_dust2", 0, 8, _mapNamebuffer, 0);
         }
 
         protected override void Render()
@@ -149,11 +155,19 @@ namespace baguette
 
             ImGui.Begin("Baguette");
             // ImGui.Begin("Logo");
-            // ImGui.Image(logoImgPtr, new Vector2(200, 200));
+            /*
+            if (ImGui.CollapsingHeader(""))
+            {
+                ImGui.Image(logoImgPtr, new Vector2(200, 200));
+            }
+            */
             // ImGui.End();
 
             //ImGui.Begin("Baguette");
             ImGui.NewLine();
+            ImGui.InputText("Map name", _mapNamebuffer, (uint)_mapNamebuffer.Length);
+            ImGui.NewLine();
+            ImGui.Checkbox("Enable Web Server", ref _serverEnabled);
             ImGui.Checkbox("Enable ESP", ref _espEnabled);
             if(ImGui.CollapsingHeader("Esp Config"))
             {
@@ -453,6 +467,8 @@ namespace baguette
             Vector4 nameColor = new Vector4(1, 1, 1, 1);
             int yOffset = 20;
             Vector2 textPostition = new Vector2(entity.ViewOffsetV2.X, entity.ViewOffsetV2.Y - yOffset);
+
+            //drawListPtr.AddText(textPostition, ImGui.ColorConvertFloat4ToU32(nameColor), $"{entity.Name.Replace("?", "")}");
             drawListPtr.AddText(textPostition, ImGui.ColorConvertFloat4ToU32(nameColor), $"{entity.Name}");
         }
 

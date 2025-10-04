@@ -33,8 +33,8 @@ socket.on("players", event => {
 		if (player.Health <= 0) {
 			// TODO : remove ???
 			classes.push("dead")
-			global.playerBuffers.map(el => [])
-			console.log('global.playerBuffers : ', global.playerBuffers)
+			// global.playerBuffers.map(el => [])
+			// console.log('global.playerBuffers : ', global.playerBuffers)
 		}
 		else {
 			// Make the bomb carrier orange and and a line around the spectated player
@@ -45,22 +45,21 @@ socket.on("players", event => {
 			// TODO : wtf ?
 			// if (player.flashed > 31) classes.push("flashed")
 
-			// TODO : wtf ?
-			// // If drawing muzzle flashes is enabled
-			// if (global.config.radar.shooting) {
-			// 	// Go through each weapon the player has
-			// 	for (let weapon in player.ammo) {
-			// 		if (global.playerAmmos[i][weapon]) {
-			// 			// They are shooting if there's less ammo in the clip than the packet before
-			// 			if (global.playerAmmos[i][weapon] > player.ammo[weapon]) {
-			// 				classes.push("shooting")
-			// 			}
-			// 		}
-			// 	}
+			// If drawing muzzle flashes is enabled
+			if (global.config.radar.shooting) {
+				// Go through each weapon the player has
+				for (let weapon in player.ammo) {
+					if (global.playerAmmos[i][weapon]) {
+						// They are shooting if there's less ammo in the clip than the packet before
+						if (global.playerAmmos[i][weapon] > player.ammo[weapon]) {
+							classes.push("shooting")
+						}
+					}
+				}
 
-			// 	// Save the last ammo stats for the next packet
-			// 	global.playerAmmos[i] = player.ammo
-			// }
+				// Save the last ammo stats for the next packet
+				global.playerAmmos[i] = player.Ammo
+			}
 
 			// If damage indicators are enabled
 			if (global.config.radar.damage) {
@@ -93,10 +92,10 @@ socket.on("players", event => {
 		global.playerPos[i].alive = player.Health > 0
 
 		if (global.config.radar.showName == "both") {
-			playerLabel.children[0].textContent = player.name.substring(0, global.config.radar.maxNameLength)
+			playerLabel.children[0].textContent = player.Name.substring(0, global.config.radar.maxNameLength).replace(/\u0000/g, "")
 		}
 		if (global.config.radar.showName == "always") {
-			playerLabel.textContent = player.name.substring(0, global.config.radar.maxNameLength)
+			playerLabel.textContent = player.Name.substring(0, global.config.radar.maxNameLength).replace(/\u0000/g, "")
 		}
 	}
 })

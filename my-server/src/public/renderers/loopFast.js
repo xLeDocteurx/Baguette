@@ -99,14 +99,19 @@ function step() {
 		let bufferAngle = (global.playerBuffers[num].reduce((prev, curr) => prev + curr.a, 0) / (global.playerBuffers[num].length))
 
 		// Apply the calculated X and Y to the player dot
-		global.playerDots[num].style.left = global.playerPos[num].x + "%"
-		global.playerDots[num].style.bottom = global.playerPos[num].y + "%"
-		global.playerLabels[num].style.left = global.playerPos[num].x + "%"
-		global.playerLabels[num].style.bottom = global.playerPos[num].y + "%"
+		global.playerDots[num].style.left = bufferPercX + "%"
+		global.playerDots[num].style.bottom = bufferPercY + "%"
+		global.playerLabels[num].style.left = bufferPercX + "%"
+		global.playerLabels[num].style.bottom = bufferPercY + "%"
+		// global.playerDots[num].style.left = global.playerPos[num].x + "%"
+		// global.playerDots[num].style.bottom = global.playerPos[num].y + "%"
+		// global.playerLabels[num].style.left = global.playerPos[num].x + "%"
+		// global.playerLabels[num].style.bottom = global.playerPos[num].y + "%"
 
 		// Apply the transformations to the dots
 		if (global.playerPos[num].alive) {
-			global.playerDots[num].style.transform = `rotate(${global.playerPos[num].a - 45}deg) scale(${scale}) translate(-50%, 50%)`
+			global.playerDots[num].style.transform = `rotate(${bufferAngle - 45}deg) scale(${scale}) translate(-50%, 50%)`
+			// global.playerDots[num].style.transform = `rotate(${global.playerPos[num].a - 45}deg) scale(${scale}) translate(-50%, 50%)`
 		}
 		else {
 			global.playerDots[num].style.transform = `rotate(0deg) scale(${global.config.radar.playerDotScale}) translate(-50%, 50%)`
