@@ -15,3 +15,5 @@ build_property.RootNamespace = baguette
 build_property.ProjectDir = C:\Users\lenoi\source\repos\baguette\baguette\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.EffectiveAnalysisLevelStyle = 8.0
+build_property.EnableCodeStyleSeverity = 

@@ -54,14 +54,13 @@ static extern short GetAsyncKeyState(int vKey); // Handle hotkey
 [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
 static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, int dwExtraInfo);
 
-
 Vector2 screenSize = renderer.screenSize;
 List<Entity> entities = new List<Entity>();
 Entity localPlayer = new Entity();
 Entity bomb = new Entity();
 
-// Uri serverUri = new Uri("ws://94.125.162.126:3000");
-Uri serverUri = new Uri("ws://localhost:3000");
+ Uri serverUri = new Uri("ws://94.125.162.126:3000");
+//Uri serverUri = new Uri("ws://localhost:3000");
 SocketIOClient.SocketIO client = null!;
 async void connectToWebSocket()
 {
@@ -144,17 +143,23 @@ while (true)
 
     for (int i = 0; i < 64; i++)
     {
-        IntPtr currentControllerPtr = swed.ReadPointer(listEntryPtr, i * 0x78);
+        //Console.WriteLine($"----------");
+        
+        IntPtr currentControllerPtr = swed.ReadPointer(listEntryPtr, i * 0x70);
         if(currentControllerPtr == IntPtr.Zero)
         {
             continue;
         }
+
+        //Console.WriteLine($"entity {i} : 1");
 
         int pawnHandle = swed.ReadInt(currentControllerPtr, (int)CS2Dumper.Schemas.ClientDll.CCSPlayerController.m_hPlayerPawn);
         if (pawnHandle == 0)
         {
             continue;
         }
+
+        //Console.WriteLine($"entity {i} : 2");
 
         IntPtr listEntry2Ptr = swed.ReadPointer(entityListPtr, 0x8 * ((pawnHandle & 0x7FFF) >> 9) + 0x10);
         /*IntPtr listEntryPtr = swed.ReadPointer(listEntryFirstPtr, 0x8 * ((pawnHandle & 0x7FFF) >> 9));*/
@@ -163,11 +168,15 @@ while (true)
             continue;
         }
 
-        IntPtr entryPlayerPawn = swed.ReadPointer(listEntry2Ptr, 0x78 * (pawnHandle  & 0x1FF));
+        //Console.WriteLine($"entity {i} : 3");
+
+        IntPtr entryPlayerPawn = swed.ReadPointer(listEntry2Ptr, 0x70 * (pawnHandle  & 0x1FF));
         if (entryPlayerPawn == IntPtr.Zero)
         {
             continue;
         }
+
+        //Console.WriteLine($"entity {i} : 4");
 
         //int lifeState = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_lifeState);
         //if (lifeState != 256)
@@ -181,12 +190,16 @@ while (true)
             continue;
         }
 
+        //Console.WriteLine($"entity {i} : 5");
+
         // IntPtr boneMatrixPtr = swed.ReadPointer(sceneNodePtr, m_modelState, + 0x80); // 0x80 would be dwBoneMatrix
         IntPtr boneMatrixPtr = swed.ReadPointer(sceneNodePtr, (int)CS2Dumper.Schemas.ClientDll.CSkeletonInstance.m_modelState + 0x80); // 0x80 would be dwBoneMatrix
         if (boneMatrixPtr == IntPtr.Zero)
         {
             continue;
         }
+
+        //Console.WriteLine($"entity {i} : 6");
 
         // Populate entity
         Entity entity = new Entity();
@@ -202,17 +215,15 @@ while (true)
 
         entity.Name = swed.ReadString(currentControllerPtr, (int)CS2Dumper.Schemas.ClientDll.CBasePlayerController.m_iszPlayerName, 16).Split('?')[0];
         //entity.Name = entity.Name.Replace("?", "");
+
+        entity.IsAlive = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_lifeState) == 256;
         entity.Health = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iHealth);
         entity.Armor = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_ArmorValue);
 
-
-
-        public const nint m_pWeaponServices = 0x1408; // CPlayer_WeaponServices*
-        IntPtr currentWeaponPtr = swed.ReadPointer(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_pWeaponServices);
-        
-        int ammoInClip = swed.ReadInt(currentWeaponPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseCombatWeapon.m_iClip1);
-        int ammoReserve = swed.ReadInt(currentWeaponPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseCombatWeapon.m_iPrimaryAmmoCount);
-        entity.Ammo = ammoInClip;
+        //IntPtr currentWeaponPtr = swed.ReadPointer(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_hActiveWeapon);
+        //int ammoInClip = swed.ReadInt(currentWeaponPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseCombatWeapon.m_iClip1);
+        //int ammoReserve = swed.ReadInt(currentWeaponPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseCombatWeapon.m_iPrimaryAmmoCount);
+        //entity.Ammo = ammoInClip;
 
         entity.PositionV3 = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_vOldOrigin);
         entity.ViewOffsetV3 = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseModelEntity.m_vecViewOffset);
@@ -245,24 +256,77 @@ while (true)
     localPlayer.ViewOffsetV3 = swed.ReadVec(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseModelEntity.m_vecViewOffset);
     localPlayer.PositionV2 = Renderer.WorldToScreen(viewMatrix, localPlayer.PositionV3, screenSize);
     localPlayer.ViewOffsetV2 = Renderer.WorldToScreen(viewMatrix, Vector3.Add(localPlayer.PositionV3, localPlayer.ViewOffsetV3), screenSize);
+    
+    //Console.WriteLine($"localPlayer : {localPlayer}");
+    //Console.WriteLine($"localPlayer.Team : {localPlayer.Team}");
+    //Console.WriteLine($"localPlayer.Health : {localPlayer.Health}");
+    //Console.WriteLine($"localPlayer.Armor : {localPlayer.Armor}");
+
+    //Console.WriteLine($"localPlayer.PositionV3 : {localPlayer.PositionV3}");
+    //Console.WriteLine($"localPlayer.ViewOffsetV3 : {localPlayer.ViewOffsetV3}");
+    //Console.WriteLine($"localPlayer.PositionV2 : {localPlayer.PositionV2}");
+    //Console.WriteLine($"localPlayer.ViewOffsetV2 : {localPlayer.ViewOffsetV2}");
 
     renderer.UpdateLocalPlayer(localPlayer);
     renderer.UpdateLocalEntities(entities);
 
-    int entIndex = swed.ReadInt(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_iIDEntIndex);
+    int targetIndex = swed.ReadInt(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_iIDEntIndex);
+    bool targetIsOtherTeam = false;
+
+    //Console.WriteLine($"-----   -----");
+    //Console.WriteLine($"localPlayer.Team : {localPlayer.Team} / targetIndex : {targetIndex}");
+    if (targetIndex != -1)
+    {
+        IntPtr targetEntity = swed.ReadPointer(entityListPtr, 0x8 * ((targetIndex & 0x7FFF) >> 9) + 0x10);
+        if (targetEntity == IntPtr.Zero)
+        {
+            continue;
+        }
+
+        IntPtr targetPlayerPawn = swed.ReadPointer(listEntryPtr, 0x70 * (targetIndex & 0x1FF));
+        if (targetPlayerPawn == IntPtr.Zero)
+        {
+            continue;
+        }
+
+        int targetTeam = swed.ReadInt(targetPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iTeamNum);
+        //Console.WriteLine($"localPlayer.Team : {localPlayer.Team} / targetTeam : {targetTeam}");
+
+        targetIsOtherTeam = localPlayer.Team != targetTeam;
+        if (GetAsyncKeyState(0x6) < 0 && renderer.aimBotEnabled && (renderer.aimBotFollowEveryoneEnabled || targetIsOtherTeam))
+        {
+            IntPtr sceneNodePtr = swed.ReadPointer(targetPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_pGameSceneNode);
+            if (sceneNodePtr == IntPtr.Zero)
+            {
+                continue;
+            }
+            IntPtr boneMatrixPtr = swed.ReadPointer(sceneNodePtr, (int)CS2Dumper.Schemas.ClientDll.CSkeletonInstance.m_modelState + 0x80); // 0x80 would be dwBoneMatrix
+            if (boneMatrixPtr == IntPtr.Zero)
+            {
+                continue;
+            }
+            List<Vector3> bones3D = Renderer.ReadBones(boneMatrixPtr, swed);
+            List<Vector2> bones2D = Renderer.ReadBones2D(bones3D, viewMatrix, screenSize);
+            Vector2 targetHead = bones2D[2];
+            AimBot.followHead(targetHead);
+        }
+    }
 
     if (
         !TriggerBot.shootLock
         &&
-        renderer.triggerBotEnabled 
+        renderer.triggerBotEnabled
         &&
-        (GetAsyncKeyState(0x6) < 0 || renderer.triggerBotAutoModeEnabled) 
-        && 
-        entIndex != -1
+        (GetAsyncKeyState(0x6) < 0 || renderer.triggerBotAutoModeEnabled)
+        &&
+        (renderer.triggerBotShootEveryoneEnabled || targetIsOtherTeam)
+        &&
+        targetIndex != -1
     ) // mouse 4 or 5
     {
-        Thread shootThread = new Thread(new ThreadStart(() => {
-            TriggerBot.shoot(entIndex, renderer.triggerBotReflexTime, renderer.triggerBotPressedDuration, renderer.triggerBotDelayBetweenClicks);
+        Thread shootThread = new Thread(new ThreadStart(() =>
+        {
+            TriggerBot.shoot(targetIndex, renderer.triggerBotReflexTime, renderer.triggerBotPressedDuration, renderer.triggerBotDelayBetweenClicks);
         }));
         shootThread.Start();
     }

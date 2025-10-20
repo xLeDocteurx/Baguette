@@ -199,7 +199,6 @@ C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\createdum
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\hostfxr.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\hostpolicy.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\mscordaccore.dll
-C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\mscordaccore_amd64_amd64_8.0.1024.46610.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\mscordbi.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\mscorrc.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\msquic.dll
@@ -219,3 +218,4 @@ C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SocketIO.
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SocketIO.Serializer.Core.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SocketIO.Serializer.SystemTextJson.dll
 C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\SocketIOClient.dll
+C:\Users\lenoi\source\repos\baguette\baguette\bin\Debug\net8.0\win-x64\mscordaccore_amd64_amd64_8.0.2125.47513.dll

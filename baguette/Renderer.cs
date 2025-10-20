@@ -113,8 +113,8 @@ namespace baguette
         private bool _espDrawTeam = false;
         private bool _espBoxeEnabled = false;
         private bool _espLinesEnabled = true;
-        private bool _espHealthBarEnabmled = false;
-        private bool _espArmorBarEnabmled = false;
+        private bool _espHealthBarEnabmled = true;
+        private bool _espArmorBarEnabmled = true;
         private bool _espHeadEnabled = true;
         private bool _espBonesEnabled = true;
         private bool _espBombEnabled = true;
@@ -122,11 +122,14 @@ namespace baguette
 
         public bool triggerBotEnabled = true;
         public bool triggerBotAutoModeEnabled = false;
-
         public bool triggerBotShootEveryoneEnabled = false;
-        public int triggerBotReflexTime = 17;
-        public int triggerBotPressedDuration = 150;
-        public int triggerBotDelayBetweenClicks = 350;
+
+        public int triggerBotReflexTime = 10;
+        public int triggerBotPressedDuration = 50;
+        public int triggerBotDelayBetweenClicks = 450;
+
+        public bool aimBotEnabled = false;
+        public bool aimBotFollowEveryoneEnabled = false;
 
         private Vector4 _enemyTeamColor = new Vector4(1, 0, 0, 1);
         private Vector4 _allyTeamColor = new Vector4(0, 1, 0, 1);
@@ -203,6 +206,11 @@ namespace baguette
                 ImGui.InputInt("Click press duration", ref triggerBotPressedDuration);
                 ImGui.InputInt("Delay between clicks", ref triggerBotDelayBetweenClicks);
             }
+            if(ImGui.CollapsingHeader("AimBot Config"))
+            {
+                ImGui.Checkbox("Enable AimBot", ref aimBotEnabled);
+                ImGui.Checkbox("Enable Aim Everyone", ref aimBotFollowEveryoneEnabled);
+            }
             ImGui.End();
 
             // DrawOverlay
@@ -214,15 +222,13 @@ namespace baguette
                 foreach (Entity entity in _entities)
                 {
                     // if(EntityOnScreen(entity))
-                    if(
-                        EntityOnScreen(entity) && _espDrawTeam
+                    if (
+                        entity.IsAlive &&
+                        (EntityOnScreen(entity) && _espDrawTeam
                         ||
-                        EntityOnScreen(entity) && !_espDrawTeam && entity.Team != _localPlayer.Team
+                        EntityOnScreen(entity) && !_espDrawTeam && entity.Team != _localPlayer.Team)
                     )
                         {
-                        if (_espBoxeEnabled) {
-                            DrawBox(entity);
-                        }
 
                         // DrawName
 
@@ -239,6 +245,11 @@ namespace baguette
                         if (_espArmorBarEnabmled)
                         {
                             DrawArmorBar(entity);
+                        }
+
+                        if (_espBoxeEnabled)
+                        {
+                            DrawBox(entity);
                         }
 
                         if (_espHeadEnabled)
@@ -287,6 +298,7 @@ namespace baguette
         void DrawBox(Entity entity)
         {
             Vector4 boxColor = _localPlayer.Team == entity.Team ? _allyTeamColor : _enemyTeamColor;
+            //Vector4 boxColor = new Vector4(0, 0, 0, 0.25f);
             boxColor.W = 0.5f;
             // Vector4 boxColor = new Vector4(0, 0, 0, 1);
             Vector4 boxFillColor = new Vector4(0, 0, 0, 0.25f);
@@ -302,44 +314,44 @@ namespace baguette
 
         void DrawHealthBar(Entity entity)
         {
-            Vector4 boxColor = new Vector4(0, 0, 0, 1);
+            Vector4 boxColor = new Vector4(0, 0, 0, 0.25f);
             Vector4 boxFillColor = new Vector4(0, 0, 0, 0.25f);
             Vector4 healthBarFillColor = new Vector4(0, 1, 0, 1);
 
             float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
-            float entityWidth = entityHeight / 4;
+            float entityWidth = entityHeight / 5;
             float healthFillHeight = entityHeight * (entity.Health / 100.0f);
             float fillWidth = entityWidth / 4;
 
-            Vector2 healthRectTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + fillWidth, entity.ViewOffsetV2.Y);
-            Vector2 healthRectBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
-            Vector2 healthFillTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + fillWidth, entity.PositionV2.Y + healthFillHeight);
+            Vector2 healthFillTop = new Vector2(entity.PositionV2.X + entityWidth + fillWidth, entity.PositionV2.Y + healthFillHeight);
             Vector2 healthFillBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
+            Vector2 healthRectTop = new Vector2(entity.PositionV2.X + entityWidth + fillWidth, entity.PositionV2.Y + entityHeight);
+            Vector2 healthRectBottom = new Vector2(entity.PositionV2.X + entityWidth, entity.PositionV2.Y);
 
             // drawListPtr.AddRectFilled(healthRectTop, healthRectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
             drawListPtr.AddRectFilled(healthFillTop, healthFillBottom, ImGui.ColorConvertFloat4ToU32(healthBarFillColor));
-            // drawListPtr.AddRect(healthRectTop, healthRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
+            drawListPtr.AddRect(healthRectTop, healthRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
         }
 
         void DrawArmorBar(Entity entity)
         {
-            Vector4 boxColor = new Vector4(0, 0, 0, 1);
+            Vector4 boxColor = new Vector4(0, 0, 0, 0.25f);
             Vector4 boxFillColor = new Vector4(0, 0, 0, 0.25f);
             Vector4 armorBarFillColor = new Vector4(1, 1, 0, 1);
 
             float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
-            float entityWidth = entityHeight / 4;
+            float entityWidth = entityHeight / 5;
             float armorFillHeight = entityHeight * (entity.Armor / 100.0f);
             float fillWidth = entityWidth / 4;
 
-            Vector2 armorRectTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + (fillWidth * 2) + fillWidth, entity.ViewOffsetV2.Y);
-            Vector2 armorRectBottom = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 2), entity.PositionV2.Y);
-            Vector2 armorFillTop = new Vector2(entity.ViewOffsetV2.X + entityWidth + (fillWidth * 2) + fillWidth, entity.PositionV2.Y + armorFillHeight);
-            Vector2 armorFillBottom = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 2), entity.PositionV2.Y);
+            Vector2 armorFillTop = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 1) + fillWidth, entity.PositionV2.Y + armorFillHeight);
+            Vector2 armorFillBottom = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 1), entity.PositionV2.Y);
+            Vector2 armorRectTop = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 1) + fillWidth, entity.PositionV2.Y + entityHeight);
+            Vector2 armorRectBottom = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 1), entity.PositionV2.Y);
 
             // drawListPtr.AddRectFilled(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
             drawListPtr.AddRectFilled(armorFillTop, armorFillBottom, ImGui.ColorConvertFloat4ToU32(armorBarFillColor));
-            // drawListPtr.AddRect(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
+            drawListPtr.AddRect(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
         }
 
         void DrawHead(Entity entity)
@@ -499,11 +511,7 @@ namespace baguette
 
         bool EntityOnScreen(Entity entity)
         {
-            return 
-                (entity.PositionV2.X > 0 && entity.PositionV2.X < screenSize.X && entity.PositionV2.Y > 0 && entity.PositionV2.Y < screenSize.Y)
-                /*||
-                (entity.ViewOffsetV2.X > 0 && entity.ViewOffsetV2.X < screenSize.X && entity.ViewOffsetV2.Y > 0 && entity.ViewOffsetV2.Y < screenSize.Y)*/
-                ;
+            return (entity.PositionV2.X > 0 && entity.PositionV2.X < screenSize.X && entity.PositionV2.Y > 0 && entity.PositionV2.Y < screenSize.Y);
         }
     }
 }

@@ -33,6 +33,7 @@ namespace baguette
         public bool hasArmor { get; set; }
         public bool hasHelmet{ get; set; }
         public string Name { get; set; }
+        public bool IsAlive { get; set; }
         public int Health { get; set; }
         public int Armor { get; set; }
         public int Ammo { get; set; }
