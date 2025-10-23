@@ -109,12 +109,13 @@ namespace baguette
         public byte[] _mapNamebuffer = new byte[100];
         public bool _serverEnabled = true;
         private bool _espEnabled = true;
-        private bool _drawNamesEnabled = true;
+        private bool _drawNamesEnabled = false;
         private bool _espDrawTeam = false;
         private bool _espBoxeEnabled = false;
         private bool _espLinesEnabled = true;
         private bool _espHealthBarEnabmled = true;
         private bool _espArmorBarEnabmled = true;
+        private bool _espAmmoEnabled = true;
         private bool _espHeadEnabled = true;
         private bool _espBonesEnabled = true;
         private bool _espBombEnabled = true;
@@ -190,6 +191,7 @@ namespace baguette
                 ImGui.Checkbox("Enable ESP Lines", ref _espLinesEnabled);
                 ImGui.Checkbox("Enable Healthbar", ref _espHealthBarEnabmled);
                 ImGui.Checkbox("Enable Armor", ref _espArmorBarEnabmled);
+                ImGui.Checkbox("Enable Ammo", ref _espAmmoEnabled);
                 ImGui.Checkbox("Enable Heads", ref _espHeadEnabled);
                 ImGui.Checkbox("Enable Bones", ref _espBonesEnabled);
                 ImGui.Checkbox("Enable Bomb & Diffusers", ref _espBombEnabled);
@@ -206,9 +208,9 @@ namespace baguette
                 ImGui.InputInt("Click press duration", ref triggerBotPressedDuration);
                 ImGui.InputInt("Delay between clicks", ref triggerBotDelayBetweenClicks);
             }
+            ImGui.Checkbox("Enable AimBot", ref aimBotEnabled);
             if(ImGui.CollapsingHeader("AimBot Config"))
             {
-                ImGui.Checkbox("Enable AimBot", ref aimBotEnabled);
                 ImGui.Checkbox("Enable Aim Everyone", ref aimBotFollowEveryoneEnabled);
             }
             ImGui.End();
@@ -245,6 +247,13 @@ namespace baguette
                         if (_espArmorBarEnabmled)
                         {
                             DrawArmorBar(entity);
+                        }
+
+                        if (_espAmmoEnabled)
+                        {
+                            //DrawAmmoBar(entity);
+                            DrawWeaponName(entity);
+                            DrawAmmoCount(entity);
                         }
 
                         if (_espBoxeEnabled)
@@ -292,7 +301,7 @@ namespace baguette
         void DrawLine(Entity entity)
         {
             Vector4 lineColor = _localPlayer.Team == entity.Team ? _allyTeamColor : entity.hasBomb ? bombColor : _enemyTeamColor;
-            drawListPtr.AddLine(new Vector2(screenSize.X / 2, screenSize.Y), entity.PositionV2, ImGui.ColorConvertFloat4ToU32(lineColor));
+            drawListPtr.AddLine(new Vector2(screenSize.X / 2, screenSize.Y / 2), entity.bones2D[2], ImGui.ColorConvertFloat4ToU32(lineColor));
         }
 
         void DrawBox(Entity entity)
@@ -352,6 +361,46 @@ namespace baguette
             // drawListPtr.AddRectFilled(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
             drawListPtr.AddRectFilled(armorFillTop, armorFillBottom, ImGui.ColorConvertFloat4ToU32(armorBarFillColor));
             drawListPtr.AddRect(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
+        }
+
+        void DrawAmmoBar(Entity entity)
+        {
+            Vector4 boxColor = new Vector4(0, 0, 0, 0.25f);
+            Vector4 boxFillColor = new Vector4(0, 0, 0, 0.25f);
+            Vector4 ammoBarFillColor = new Vector4(0, 1, 1, 1);
+
+            float entityHeight = entity.ViewOffsetV2.Y - entity.PositionV2.Y;
+            float entityWidth = entityHeight / 5;
+            // TODO : Replace 30 by the ammo capacity of the weapon
+            float ammoFillHeight = entityHeight * (entity.Ammo / 12);
+            float fillWidth = entityWidth / 4;
+
+            Vector2 ammoFillTop = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 2) + fillWidth, entity.PositionV2.Y + ammoFillHeight);
+            Vector2 ammoFillBottom = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 2), entity.PositionV2.Y);
+            Vector2 ammoRectTop = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 2) + fillWidth, entity.PositionV2.Y + entityHeight);
+            Vector2 ammoRectBottom = new Vector2(entity.PositionV2.X + entityWidth + (fillWidth * 2), entity.PositionV2.Y);
+
+            // drawListPtr.AddRectFilled(armorRectTop, armorRectBottom, ImGui.ColorConvertFloat4ToU32(boxFillColor));
+            drawListPtr.AddRectFilled(ammoFillTop, ammoFillBottom, ImGui.ColorConvertFloat4ToU32(ammoBarFillColor));
+            drawListPtr.AddRect(ammoRectTop, ammoRectBottom, ImGui.ColorConvertFloat4ToU32(boxColor));
+        }
+        void DrawWeaponName(Entity entity)
+        {
+            Vector4 nameColor = new Vector4(1, 1, 1, 1);
+            int yOffset = 30;
+            Vector2 textPostition = new Vector2(entity.ViewOffsetV2.X, entity.ViewOffsetV2.Y - yOffset);
+
+            //drawListPtr.AddText(textPostition, ImGui.ColorConvertFloat4ToU32(nameColor), $"{entity.Name.Replace("?", "")}");
+            drawListPtr.AddText(textPostition, ImGui.ColorConvertFloat4ToU32(nameColor), $"{entity.WeaponName}");
+        }
+        void DrawAmmoCount(Entity entity)
+        {
+            Vector4 nameColor = new Vector4(1, 1, 1, 1);
+            int yOffset = 40;
+            Vector2 textPostition = new Vector2(entity.ViewOffsetV2.X, entity.ViewOffsetV2.Y - yOffset);
+
+            //drawListPtr.AddText(textPostition, ImGui.ColorConvertFloat4ToU32(nameColor), $"{entity.Name.Replace("?", "")}");
+            drawListPtr.AddText(textPostition, ImGui.ColorConvertFloat4ToU32(nameColor), $"{entity.Ammo}");
         }
 
         void DrawHead(Entity entity)

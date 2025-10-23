@@ -143,7 +143,6 @@ while (true)
 
     for (int i = 0; i < 64; i++)
     {
-        //Console.WriteLine($"----------");
         
         IntPtr currentControllerPtr = swed.ReadPointer(listEntryPtr, i * 0x70);
         if(currentControllerPtr == IntPtr.Zero)
@@ -151,15 +150,11 @@ while (true)
             continue;
         }
 
-        //Console.WriteLine($"entity {i} : 1");
-
         int pawnHandle = swed.ReadInt(currentControllerPtr, (int)CS2Dumper.Schemas.ClientDll.CCSPlayerController.m_hPlayerPawn);
         if (pawnHandle == 0)
         {
             continue;
         }
-
-        //Console.WriteLine($"entity {i} : 2");
 
         IntPtr listEntry2Ptr = swed.ReadPointer(entityListPtr, 0x8 * ((pawnHandle & 0x7FFF) >> 9) + 0x10);
         /*IntPtr listEntryPtr = swed.ReadPointer(listEntryFirstPtr, 0x8 * ((pawnHandle & 0x7FFF) >> 9));*/
@@ -168,23 +163,13 @@ while (true)
             continue;
         }
 
-        //Console.WriteLine($"entity {i} : 3");
-
-        IntPtr entryPlayerPawn = swed.ReadPointer(listEntry2Ptr, 0x70 * (pawnHandle  & 0x1FF));
-        if (entryPlayerPawn == IntPtr.Zero)
+        IntPtr entryPlayerPawnPtr = swed.ReadPointer(listEntry2Ptr, 0x70 * (pawnHandle  & 0x1FF));
+        if (entryPlayerPawnPtr == IntPtr.Zero)
         {
             continue;
         }
 
-        //Console.WriteLine($"entity {i} : 4");
-
-        //int lifeState = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_lifeState);
-        //if (lifeState != 256)
-        //{
-        //    continue;
-        //}
-
-        IntPtr sceneNodePtr = swed.ReadPointer(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_pGameSceneNode);
+        IntPtr sceneNodePtr = swed.ReadPointer(entryPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_pGameSceneNode);
         if (sceneNodePtr == IntPtr.Zero)
         {
             continue;
@@ -203,9 +188,10 @@ while (true)
 
         // Populate entity
         Entity entity = new Entity();
-        entity.Team = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iTeamNum);
+        entity.Team = swed.ReadInt(entryPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iTeamNum);
 
-        IntPtr entryItemServicesPtr = swed.ReadPointer(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_pItemServices);
+
+        IntPtr entryItemServicesPtr = swed.ReadPointer(entryPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_pItemServices);
         entity.hasDiffuser = swed.ReadBool(entryItemServicesPtr, (int)CS2Dumper.Schemas.ClientDll.CCSPlayer_ItemServices.m_bHasDefuser);
         // TODO : put back
         // entity.hasArmor = swed.ReadBool(entryItemServicesPtr, (int)CS2Dumper.Schemas.ClientDll.CCSPlayer_ItemServices.m_bHasHeavyArmor);
@@ -214,19 +200,24 @@ while (true)
         entity.hasBomb = (int)bombOwnerPtr == pawnHandle;
 
         entity.Name = swed.ReadString(currentControllerPtr, (int)CS2Dumper.Schemas.ClientDll.CBasePlayerController.m_iszPlayerName, 16).Split('?')[0];
-        //entity.Name = entity.Name.Replace("?", "");
 
-        entity.IsAlive = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_lifeState) == 256;
-        entity.Health = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iHealth);
-        entity.Armor = swed.ReadInt(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_ArmorValue);
+        entity.IsAlive = swed.ReadInt(entryPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_lifeState) == 256;
+        entity.Health = swed.ReadInt(entryPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iHealth);
+        entity.Armor = swed.ReadInt(entryPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_ArmorValue);
 
-        //IntPtr currentWeaponPtr = swed.ReadPointer(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_hActiveWeapon);
-        //int ammoInClip = swed.ReadInt(currentWeaponPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseCombatWeapon.m_iClip1);
-        //int ammoReserve = swed.ReadInt(currentWeaponPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseCombatWeapon.m_iPrimaryAmmoCount);
-        //entity.Ammo = ammoInClip;
+        IntPtr entryWeaponServicesPtr = swed.ReadPointer(entryPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_pWeaponServices);
+        int entityActiveWeaponHandleInt = swed.ReadInt(entryWeaponServicesPtr, (int)CS2Dumper.Schemas.ClientDll.CPlayer_WeaponServices.m_hActiveWeapon);
+        IntPtr activeWeaponListEntry2Ptr = swed.ReadPointer(entityListPtr, 0x8 * ((entityActiveWeaponHandleInt & 0x7FFF) >> 9) + 0x10);
+        IntPtr activeWeaponEntryPtr = swed.ReadPointer(activeWeaponListEntry2Ptr, 0x70 * (entityActiveWeaponHandleInt & 0x1FF));
 
-        entity.PositionV3 = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_vOldOrigin);
-        entity.ViewOffsetV3 = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseModelEntity.m_vecViewOffset);
+        IntPtr activeWeaponBasePtr = swed.ReadPointer(entryPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_pClippingWeapon);
+        short activeWeaponBaseDefinitionIndex = swed.ReadShort(activeWeaponBasePtr, (int)CS2Dumper.Schemas.ClientDll.C_EconEntity.m_AttributeManager + (int)CS2Dumper.Schemas.ClientDll.C_AttributeContainer.m_Item + (int)CS2Dumper.Schemas.ClientDll.C_EconItemView.m_iItemDefinitionIndex);
+
+        entity.WeaponName = Enum.GetName(typeof(Weapons), activeWeaponBaseDefinitionIndex);
+        entity.Ammo = swed.ReadInt(activeWeaponEntryPtr, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerWeapon.m_iClip1);
+
+        entity.PositionV3 = swed.ReadVec(entryPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_vOldOrigin);
+        entity.ViewOffsetV3 = swed.ReadVec(entryPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseModelEntity.m_vecViewOffset);
         entity.PositionV2 = Renderer.WorldToScreen(viewMatrix, entity.PositionV3, screenSize);
         entity.ViewOffsetV2 = Renderer.WorldToScreen(viewMatrix, Vector3.Add(entity.PositionV3, entity.ViewOffsetV3), screenSize);
 
@@ -235,13 +226,11 @@ while (true)
         entity.bones3D = Renderer.ReadBones(boneMatrixPtr, swed);
         entity.bones2D = Renderer.ReadBones2D(entity.bones3D, viewMatrix, screenSize);
 
-        //Vector3 head = entity.bones3D[/*HeadBoneIndex*/ 8];
         Vector3 head = entity.bones3D[8];
         Vector3 feet = entity.PositionV3;
         Vector3 dir = Vector3.Normalize(head - feet);
         float angle = MathF.Atan2(dir.Y, dir.X) * (180f / MathF.PI);
 
-        //entity.Angle = swed.ReadVec(entryPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.v_angle).Y - 90;
         entity.Angle = angle - 90;
 
         entities.Add(entity);
@@ -252,20 +241,21 @@ while (true)
     localPlayer.Health = swed.ReadInt(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iHealth);
     localPlayer.Armor = swed.ReadInt(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_ArmorValue);
 
+    IntPtr localPlayerEntryWeaponServicesPtr = swed.ReadPointer(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_pWeaponServices);
+    int localPlayerEntityActiveWeaponHandleInt = swed.ReadInt(localPlayerEntryWeaponServicesPtr, (int)CS2Dumper.Schemas.ClientDll.CPlayer_WeaponServices.m_hActiveWeapon);
+    IntPtr localPlayerActiveWeaponListEntry2Ptr = swed.ReadPointer(entityListPtr, 0x8 * ((localPlayerEntityActiveWeaponHandleInt & 0x7FFF) >> 9) + 0x10);
+    IntPtr localPLayerActiveWeaponEntryPtr = swed.ReadPointer(localPlayerActiveWeaponListEntry2Ptr, 0x70 * (localPlayerEntityActiveWeaponHandleInt & 0x1FF));
+
+    IntPtr localPlayerActiveWeaponBasePtr = swed.ReadPointer(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_pClippingWeapon);
+    short localPlayerActiveWeaponBaseDefinitionIndex = swed.ReadShort(localPlayerActiveWeaponBasePtr, (int)CS2Dumper.Schemas.ClientDll.C_EconEntity.m_AttributeManager + (int)CS2Dumper.Schemas.ClientDll.C_AttributeContainer.m_Item + (int)CS2Dumper.Schemas.ClientDll.C_EconItemView.m_iItemDefinitionIndex);
+
+    localPlayer.WeaponName = Enum.GetName(typeof(Weapons), localPlayerActiveWeaponBaseDefinitionIndex);
+    localPlayer.Ammo = swed.ReadInt(localPLayerActiveWeaponEntryPtr, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerWeapon.m_iClip1);
+
     localPlayer.PositionV3 = swed.ReadVec(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BasePlayerPawn.m_vOldOrigin);
     localPlayer.ViewOffsetV3 = swed.ReadVec(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_BaseModelEntity.m_vecViewOffset);
     localPlayer.PositionV2 = Renderer.WorldToScreen(viewMatrix, localPlayer.PositionV3, screenSize);
     localPlayer.ViewOffsetV2 = Renderer.WorldToScreen(viewMatrix, Vector3.Add(localPlayer.PositionV3, localPlayer.ViewOffsetV3), screenSize);
-    
-    //Console.WriteLine($"localPlayer : {localPlayer}");
-    //Console.WriteLine($"localPlayer.Team : {localPlayer.Team}");
-    //Console.WriteLine($"localPlayer.Health : {localPlayer.Health}");
-    //Console.WriteLine($"localPlayer.Armor : {localPlayer.Armor}");
-
-    //Console.WriteLine($"localPlayer.PositionV3 : {localPlayer.PositionV3}");
-    //Console.WriteLine($"localPlayer.ViewOffsetV3 : {localPlayer.ViewOffsetV3}");
-    //Console.WriteLine($"localPlayer.PositionV2 : {localPlayer.PositionV2}");
-    //Console.WriteLine($"localPlayer.ViewOffsetV2 : {localPlayer.ViewOffsetV2}");
 
     renderer.UpdateLocalPlayer(localPlayer);
     renderer.UpdateLocalEntities(entities);
@@ -273,8 +263,6 @@ while (true)
     int targetIndex = swed.ReadInt(localPlayerPawnPtr, (int)CS2Dumper.Schemas.ClientDll.C_CSPlayerPawn.m_iIDEntIndex);
     bool targetIsOtherTeam = false;
 
-    //Console.WriteLine($"-----   -----");
-    //Console.WriteLine($"localPlayer.Team : {localPlayer.Team} / targetIndex : {targetIndex}");
     if (targetIndex != -1)
     {
         IntPtr targetEntity = swed.ReadPointer(entityListPtr, 0x8 * ((targetIndex & 0x7FFF) >> 9) + 0x10);
@@ -290,7 +278,6 @@ while (true)
         }
 
         int targetTeam = swed.ReadInt(targetPlayerPawn, (int)CS2Dumper.Schemas.ClientDll.C_BaseEntity.m_iTeamNum);
-        //Console.WriteLine($"localPlayer.Team : {localPlayer.Team} / targetTeam : {targetTeam}");
 
         targetIsOtherTeam = localPlayer.Team != targetTeam;
         if (GetAsyncKeyState(0x6) < 0 && renderer.aimBotEnabled && (renderer.aimBotFollowEveryoneEnabled || targetIsOtherTeam))
@@ -334,9 +321,7 @@ while (true)
     if (renderer._serverEnabled && client != null && client.Connected && !isConnecting && sendWebSocketMessage)
     {
         sendWebSocketMessage = false;
-        //if(serverUri.conn)
-
-        //bool hasError = false;
+        
         try
         {
             string jsonToSend = JsonConvert.SerializeObject(entities);
@@ -346,8 +331,6 @@ while (true)
         {
             Console.WriteLine("Error players : " + ex.Message);
 
-            //if (ex.Message.Contains("The remote party closed the WebSocket connection") && isConnecting == false)
-            //{
             isConnecting = true;
             Console.WriteLine("Connection lost, reconnecting...");
             try
@@ -360,11 +343,6 @@ while (true)
             {
                 Console.WriteLine("Reconnect failed: " + reconnectEx.Message);
             }
-            //finally
-            //{
-            //    isConnecting = false;
-            //}
-            //}
         }
 
         try
@@ -378,32 +356,8 @@ while (true)
         {
             Console.WriteLine("Error map : " + ex.Message);
         }
-
-        //if (hasError)
-        //{
-        //    if (!isConnecting)
-        //    {
-        //        isConnecting = true;
-        //        Thread reconnectThread = new Thread(new ThreadStart(async () => {
-        //            await client.DisconnectAsync();
-        //            try
-        //            {
-        //                await client.ConnectAsync();
-        //                Console.WriteLine("Reconnected!");
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Console.WriteLine("Error : " + ex.Message);
-        //            }
-        //            isConnecting = false;
-        //        }));
-        //        reconnectThread.Start();
-        //    }
-        //}
     }
 
 
     Thread.Sleep((int)Math.Round(1000.0 / 60));
-    //Thread.Sleep((int)Math.Round(1000.0 / 30));
-    //Thread.Sleep((int)Math.Round(5000.0));
 }

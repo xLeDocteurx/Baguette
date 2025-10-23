@@ -36,6 +36,7 @@ namespace baguette
         public bool IsAlive { get; set; }
         public int Health { get; set; }
         public int Armor { get; set; }
+        public string WeaponName { get; set; }
         public int Ammo { get; set; }
         public float Distance { get; set; }
 
